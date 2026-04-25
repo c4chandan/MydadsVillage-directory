@@ -3,8 +3,8 @@
 // ════════════════════════════════════════════════
 const LANG = {
     en: {
-        title: "MyDad's Village Directory",
-        subtitle: "Instant digital notebook search",
+        title: 'Find Records <span style="color:var(--accent)">Instantly</span>',
+        subtitle: "Transform handwritten records into a powerful digital search experience.",
         searchPlaceholder: "Search by name or village...",
         newest: "Newest", name: "Name", price: "Price", village: "Village",
         home: "Home", admin: "Admin", explore: "Explore",
@@ -37,8 +37,8 @@ const LANG = {
         passwordLabel: "Password"
     },
     hi: {
-        title: "पापा की गाँव डायरेक्टरी",
-        subtitle: "डिजिटल नोटबुक — तुरंत खोजें",
+        title: 'रिकॉर्ड तुरंत <span style="color:var(--accent)">खोजें</span>',
+        subtitle: "लिखे हुए रिकॉर्ड को एक शक्तिशाली डिजिटल सर्च अनुभव में बदलें।",
         searchPlaceholder: "नाम या गाँव से खोजें...",
         newest: "नया", name: "नाम", price: "कीमत", village: "गाँव",
         home: "होम", admin: "एडमिन", explore: "एक्सप्लोर",
@@ -153,6 +153,12 @@ function applyLang() {
     
     const va = document.getElementById('voiceAddText');
     if (va) va.textContent = t('voiceAdd');
+
+    // Dynamic Hero Text
+    const at = document.getElementById('appTitle');
+    const as = document.getElementById('appSubtitle');
+    if (at) at.innerHTML = t('title');
+    if (as) as.textContent = t('subtitle');
 
     // Install Banner
     const it = document.getElementById('installText');
@@ -315,6 +321,7 @@ function cardHTML(r, query, showAdmin) {
 // Render Home
 // ════════════════════════════════════════════════
 let currentQuery = '';
+let iconsRendered = false;
 
 function renderHome(data) {
     const list = document.getElementById('resultsList');
@@ -325,7 +332,6 @@ function renderHome(data) {
     let items = sortData(data !== undefined ? data : records, currentSort);
     const totalMatching = items.length;
 
-    // Smart logic: Limit home results if not searching
     if (!currentQuery) {
         items = items.slice(0, HOME_LIMIT);
         viewAllBox.classList.toggle('hidden', totalMatching <= HOME_LIMIT);
@@ -339,13 +345,16 @@ function renderHome(data) {
         const msg = currentQuery ? t('noRecords') : t('noData');
         list.innerHTML = `<div class="empty-state"><i data-lucide="search-x"></i><p>${msg}</p></div>`;
         countEl.textContent = '';
-        lucide.createIcons();
         return;
     }
 
     countEl.textContent = currentQuery ? `${totalMatching} ${t('resultsFound')}` : '';
     list.innerHTML = items.map(r => cardHTML(r, currentQuery, false)).join('');
-    lucide.createIcons();
+    
+    if (!iconsRendered) {
+        lucide.createIcons();
+        iconsRendered = true;
+    }
 }
 
 
@@ -361,11 +370,9 @@ function renderBrowse() {
 
     if (!items.length) {
         list.innerHTML = `<div class="empty-state"><i data-lucide="book-open"></i><p>${t('noData')}</p></div>`;
-        lucide.createIcons();
         return;
     }
     list.innerHTML = items.map(r => cardHTML(r, '', false)).join('');
-    lucide.createIcons();
 }
 
 
@@ -416,11 +423,9 @@ function renderAdmin(data) {
 
     if (!items.length) {
         list.innerHTML = `<div class="empty-state"><i data-lucide="database"></i><p>${t('noData')}</p></div>`;
-        lucide.createIcons();
         return;
     }
     list.innerHTML = items.map(r => cardHTML(r, '', true)).join('');
-    lucide.createIcons();
 }
 
 function onAdminSearch(q) {
@@ -437,6 +442,7 @@ function onAdminSearch(q) {
 // ════════════════════════════════════════════════
 document.getElementById('mainSearch').addEventListener('input', (e) => {
     currentQuery = e.target.value.trim().toLowerCase();
+    syncUrl();
     if (!currentQuery) {
         document.getElementById('suggestions').style.display = 'none';
         renderHome();
@@ -461,7 +467,6 @@ function showSuggestions(data, q) {
             <i data-lucide="arrow-up-left" style="width:16px; color:var(--text-dim)"></i>
         </div>`).join('');
     el.style.display = 'block';
-    lucide.createIcons();
 }
 
 window.pickSuggestion = (id) => {
@@ -833,12 +838,66 @@ window.installPWA = async () => {
 };
 
 
+// ── Sync with URL ──
+function syncUrl() {
+    const q = document.getElementById('mainSearch').value.trim();
+    const url = new URL(window.location);
+    if (q) url.searchParams.set('q', q);
+    else url.searchParams.delete('q');
+    window.history.replaceState({}, '', url);
+}
+
+window.triggerSearch = () => {
+    const q = document.getElementById('mainSearch').value.trim();
+    if (q) {
+        currentQuery = q.toLowerCase();
+        syncUrl();
+        const filtered = records.filter(r =>
+            r.name.toLowerCase().includes(currentQuery) ||
+            r.village.toLowerCase().includes(currentQuery));
+        renderHome(filtered);
+    }
+};
+
+// Enter key triggers search
+document.getElementById('mainSearch').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        triggerSearch();
+    }
+});
+
+window.addEventListener('popstate', () => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q) {
+        document.getElementById('mainSearch').value = q;
+        renderResults(q);
+    } else {
+        document.getElementById('mainSearch').value = '';
+        switchView('home');
+    }
+});
+
 // ════════════════════════════════════════════════
 // Init
 // ════════════════════════════════════════════════
-lucide.createIcons();
-applyLang();
-loadRecords();
+function initApp() {
+    lucide.createIcons();
+    applyLang();
+    loadRecords();
+    
+    // Check URL for search query
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q) {
+        document.getElementById('mainSearch').value = q;
+        currentQuery = q.toLowerCase();
+    }
+}
+
+initApp();
+
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});

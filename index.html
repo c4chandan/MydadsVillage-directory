@@ -44,12 +44,30 @@
         <div class="header-logo">
             <i data-lucide="book-open" style="width:32px;height:32px"></i>
         </div>
-        <h1 id="appTitle">MyDad's Village Directory</h1>
-        <p id="appSubtitle">Instant digital notebook search</p>
+        <h1 id="appTitle">Find Records <span style="color:var(--accent)">Instantly</span></h1>
+        <p id="appSubtitle">Transform handwritten records into a powerful digital search experience.</p>
         <button class="lang-toggle" id="langToggleBtn" onclick="toggleLang()">
             <i data-lucide="languages" style="width:18px;height:18px"></i>
             <span id="langBtnText">हिंदी</span>
         </button>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-row" id="homeStats">
+        <div class="stat-item">
+            <div class="stat-val">300+</div>
+            <div class="stat-lbl">Records</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+            <div class="stat-val">Instant</div>
+            <div class="stat-lbl">Search</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+            <div class="stat-val">Voice</div>
+            <div class="stat-lbl">Enabled</div>
+        </div>
     </div>
 
     <!-- Stats Removed -->
@@ -63,6 +81,9 @@
                 <input type="text" id="mainSearch" placeholder="Search by name or village..." autocomplete="off" spellcheck="false">
                 <button class="mic-btn" id="voiceBtn" title="Voice Search" aria-label="Voice Search">
                     <i data-lucide="mic" style="width:20px;height:20px"></i>
+                </button>
+                <button class="search-action-btn" onclick="triggerSearch()">
+                    <i data-lucide="arrow-right" style="width:20px;height:20px"></i>
                 </button>
             </div>
             <div class="suggestions" id="suggestions"></div>
@@ -209,7 +230,7 @@
 
 <script>
     // Simple cache busting: refresh if version mismatch
-    const APP_VERSION = '6.0';
+    const APP_VERSION = '7.0';
     if (localStorage.getItem('app_version') !== APP_VERSION) {
         localStorage.setItem('app_version', APP_VERSION);
         if ('serviceWorker' in navigator) {
