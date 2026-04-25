@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MyDad's Village Directory</title>
+    <meta name="description" content="Digital searchable directory for my dad's village notebook records — search by name or village instantly.">
+    <meta name="theme-color" content="#ff6b00">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Village Dir">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- Install Banner -->
+    <div class="install-banner" id="installBanner">
+        <span id="installText">Install this app on your phone</span>
+        <button id="installBtn" onclick="installPWA()">Install</button>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-logo">
+            <i data-lucide="book-open" style="width:32px;height:32px"></i>
+        </div>
+        <h1 id="appTitle">MyDad's Village Directory</h1>
+        <p id="appSubtitle">Instant digital notebook search</p>
+        <button class="lang-toggle" id="langToggleBtn" onclick="toggleLang()">
+            <i data-lucide="languages" style="width:18px;height:18px"></i>
+            <span id="langBtnText">हिंदी</span>
+        </button>
+    </div>
+
+    <!-- Stats Removed -->
+
+
+    <!-- ════════ HOME VIEW ════════ -->
+    <div id="homeView">
+        <div class="search-area">
+            <div class="search-box">
+                <i data-lucide="search" style="color:var(--text-dim);width:22px;height:22px;flex-shrink:0"></i>
+                <input type="text" id="mainSearch" placeholder="Search by name or village..." autocomplete="off" spellcheck="false">
+                <button class="mic-btn" id="voiceBtn" title="Voice Search" aria-label="Voice Search">
+                    <i data-lucide="mic" style="width:20px;height:20px"></i>
+                </button>
+            </div>
+            <div class="suggestions" id="suggestions"></div>
+        </div>
+
+        <div class="chips" id="homeChips">
+            <div class="chip active" id="chipNewest" onclick="setSort('newest',this)">🕐 Newest</div>
+            <div class="chip" id="chipName" onclick="setSort('name',this)">🔤 Name</div>
+            <div class="chip" id="chipPrice" onclick="setSort('price',this)">💰 Price</div>
+            <div class="chip" id="chipVillage" onclick="setSort('village',this)">🏘️ Village</div>
+        </div>
+
+        <div id="homeListContainer">
+            <div class="section-header">
+                <h2 class="section-title" id="homeSectionTitle"><i data-lucide="clock"></i> Recent Entries</h2>
+                <div class="result-count" id="resultCount"></div>
+            </div>
+            <div id="resultsList" class="records"></div>
+            
+            <div class="view-all-container" id="viewAllContainer">
+                <button class="btn-view-all" onclick="switchView('browse')">
+                    <span id="viewAllBtnText">View All Records</span>
+                    <i data-lucide="arrow-right" style="width:18px;height:18px"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════ BROWSE VIEW ════════ -->
+    <div id="browseView" class="hidden">
+        <div class="section-header">
+            <h2 class="section-title"><i data-lucide="list"></i> <span id="browseTitle">All Entries</span></h2>
+            <div class="stat-badge" style="background:var(--accent-dim);color:var(--accent);padding:4px 12px;border-radius:var(--radius-full);font-size:0.8rem;font-weight:700" id="browseCountBadge">0</div>
+        </div>
+        <div class="chips" id="browseChips">
+            <div class="chip active" id="bChipNewest" onclick="setBrowseSort('newest',this)">🕐 Newest</div>
+            <div class="chip" id="bChipName" onclick="setBrowseSort('name',this)">🔤 Name</div>
+            <div class="chip" id="bChipPrice" onclick="setBrowseSort('price',this)">💰 Price</div>
+            <div class="chip" id="bChipVillage" onclick="setBrowseSort('village',this)">🏘️ Village</div>
+        </div>
+        <div id="browseList" class="records"></div>
+    </div>
+
+    <!-- ════════ ADMIN VIEW ════════ -->
+    <div id="adminView" class="hidden">
+        <div id="adminHeader"></div>
+        <div id="adminList" class="records"></div>
+    </div>
+
+</div><!-- /.app -->
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+    <button class="nav-btn active" id="navHome" onclick="switchView('home')">
+        <i data-lucide="home"></i>
+        <span id="navHomeText">Home</span>
+    </button>
+    <button class="nav-btn" id="navBrowse" onclick="switchView('browse')">
+        <i data-lucide="layout-grid"></i>
+        <span id="navBrowseText">Explore</span>
+    </button>
+    <button class="nav-btn" id="navAdmin" onclick="switchView('admin')">
+        <i data-lucide="lock"></i>
+        <span id="navAdminText">Admin</span>
+    </button>
+</nav>
+
+<!-- Add FAB -->
+<button class="fab" id="addFab" onclick="openModal()">
+    <i data-lucide="plus"></i>
+</button>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ════════ Record Modal ════════ -->
+<div class="modal-bg" id="recordModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="modalTitle">New Record</h2>
+            <button class="icon-btn" onclick="closeModal()"><i data-lucide="x" style="width:24px;height:24px"></i></button>
+        </div>
+        <form id="recordForm">
+            <input type="hidden" id="editId">
+            <div class="form-group">
+                <label for="fName" id="fNameLabel">Full Name</label>
+                <input type="text" id="fName" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="fVillage" id="fVillageLabel">Village Name</label>
+                <input type="text" id="fVillage" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="fPrice" id="fPriceLabel">Amount (₹)</label>
+                <input type="number" id="fPrice" required inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label for="fNote" id="fNoteLabel">Note</label>
+                <input type="text" id="fNote" autocomplete="off">
+            </div>
+            <button type="submit" class="btn-submit" id="saveBtn">Save Record</button>
+        </form>
+    </div>
+</div>
+
+<!-- ════════ Login Modal ════════ -->
+<div class="modal-bg" id="loginModal">
+    <div class="modal login-card">
+        <i data-lucide="shield" style="width:64px;height:64px;margin-bottom:20px;color:var(--accent)"></i>
+        <h2 id="loginTitle">Admin Access</h2>
+        <p id="loginSubtext" style="color:var(--text-secondary);margin-bottom:24px">Enter your secure 4-digit PIN</p>
+        <div class="form-group">
+            <input type="password" id="adminPin" class="pin-input" maxlength="4" placeholder="••••" inputmode="numeric">
+        </div>
+        <button class="btn-submit" onclick="checkPin()" id="loginBtn">Authenticate</button>
+        <button style="margin-top:16px;background:none;border:none;color:var(--text-dim);cursor:pointer;font-weight:600" onclick="cancelLogin()" id="loginBackBtn">Cancel</button>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
