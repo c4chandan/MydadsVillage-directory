@@ -2,7 +2,7 @@
     --bg: #0f0f0f;
     --surface: rgba(255, 255, 255, 0.03);
     --surface-elevated: rgba(255, 255, 255, 0.06);
-    --surface-glass: rgba(20, 20, 20, 0.7);
+    --surface-glass: rgba(255, 255, 255, 0.05);
     --accent: #ff7a00;
     --accent-light: #ff9d4d;
     --accent-dim: rgba(255, 122, 0, 0.15);
@@ -481,9 +481,9 @@ input, button, select, textarea {
     transform: translateX(-50%) translateY(-100px);
     width: calc(100% - 40px);
     max-width: 440px;
-    background: rgba(20, 20, 20, 0.85);
+    background: rgba(20, 20, 20, 0.7);
     backdrop-filter: blur(25px);
-    border: 1px solid var(--border-light);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-lg);
     z-index: 1000;
     padding: 16px;
