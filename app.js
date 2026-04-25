@@ -416,8 +416,16 @@ function renderAdmin(data) {
         <div class="search-box" style="margin-bottom:24px; border-radius:var(--radius-md);">
             <i data-lucide="search" style="color:var(--text-dim);width:20px;height:20px;flex-shrink:0"></i>
             <input type="text" id="adminSearch" placeholder="${t('adminSearch')}"
-                   oninput="onAdminSearch(this.value)" autocomplete="off" spellcheck="false">
+                   autocomplete="off" spellcheck="false">
         </div>`;
+
+    // Attach event listener after HTML is inserted
+    setTimeout(() => {
+        const adminSearchInput = document.getElementById('adminSearch');
+        if (adminSearchInput) {
+            adminSearchInput.addEventListener('input', (e) => onAdminSearch(e.target.value));
+        }
+    }, 100);
 
     updateStats();
 
@@ -429,6 +437,7 @@ function renderAdmin(data) {
 }
 
 function onAdminSearch(q) {
+    console.log('Admin search:', q);
     q = q.trim().toLowerCase();
     if (!q) { renderAdmin(); return; }
     renderAdmin(records.filter(r =>
