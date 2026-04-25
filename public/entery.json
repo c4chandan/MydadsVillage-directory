@@ -1,0 +1,524 @@
+
+  { "name": "Shri Sanjay Kumar Tiwari", "village": "Tiwari Barhawa", "price": 51 },
+  { "name": "Jitendra Sharma", "village": "Mahuawa", "price": 201 },
+  { "name": "Rohit Sharma", "village": "Mahuawa", "price": 201 },
+  { "name": "Divesh Sharma", "village": "Mahuawa", "price": 401 },
+  { "name": "Harinayaran Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Govinda Pandit", "village": "Mahuamari", "price": 501 },
+  { "name": "Dinanath Sharma", "village": "Ruka (Pattitola)", "price": 501 },
+  { "name": "Shivbali Singh", "village": "Barhajia", "price": 51 },
+  { "name": "Ramnath Ram", "village": "Bhopatpur", "price": 51 },
+  { "name": "Manoj Singh (Mukhiya)", "village": "Mohanapar", "price": 101 },
+
+  { "name": "Surendra Sharma", "village": "Ramgarh", "price": 501 },
+  { "name": "Ashok Sharma", "village": "Manikapur", "price": 251 },
+  { "name": "Pramod Sharma", "village": "Manikapur", "price": 151 },
+  { "name": "Lalbahadur Sharma", "village": "Manikapur", "price": 201 },
+  { "name": "Ramdev Singh", "village": "Barhajia", "price": 51 },
+
+  { "name": "Ramsinghasan Sharma", "village": "Bhains", "price": 1001 },
+  { "name": "Subhash Singh", "village": "Mohanapar", "price": 101 },
+  { "name": "Ayodhya Sharma", "village": "Kodviliya", "price": 151 },
+  { "name": "Sudama Sharma", "village": "Madhodevpur", "price": 251 },
+  { "name": "Shri Ram Sharma", "village": "Basnehi", "price": 151 },
+
+  { "name": "Hari Mishra", "village": "Singhe", "price": 51 },
+  { "name": "Kailash Mishra", "village": "Singhe", "price": 51 },
+  { "name": "Jeetlal Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Mahashreya Deva", "village": "Mohanapar", "price": 50 },
+  { "name": "Gangaprasad Agrawal", "village": "Majhauliraj", "price": 110 },
+
+  { "name": "Pawan Sharma", "village": "Itwa", "price": 151 },
+  { "name": "Devendra Sharma", "village": "Itwa", "price": 210 },
+  { "name": "Lakshman Singh", "village": "Dudhwan", "price": 51 },
+  { "name": "Sanjay Agrawal", "village": "Sirwan (Thane)", "price": 150 },
+  { "name": "Sultan Yadav", "village": "Sirwan (Thane)", "price": 150 }
+
+  { "name": "Harishankar Sharma", "village": "Barahaj", "price": 251 },
+  { "name": "Vinay Singh (Guddu)", "village": "Dudhwa Patti", "price": 51 },
+  { "name": "Satyaram Sharma", "village": "Padri", "price": 101 },
+  { "name": "Durgesh Pandey (DK Bhai)", "village": "Pandey Tola", "price": 101 },
+  { "name": "Pappu Singh", "village": "Gopalapur", "price": 51 },
+
+  { "name": "Vyas Sah", "village": "Mohanapar", "price": 100 },
+  { "name": "Ravindra Chaube (Maharajji)", "village": "Barhiya", "price": 251 },
+  { "name": "Durga Sharma", "village": "Mohanapar", "price": 51 },
+  { "name": "Dhotkalam Sharma", "village": "Rudrapur", "price": 50 },
+  { "name": "Vivek Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Hiram Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Chandram Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Ramji Prasad", "village": "Bishunpura", "price": 51 },
+  { "name": "Shama Bhushan Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Dr. Bhupendra Singh", "village": "Dudhwa", "price": 51 },
+
+  { "name": "Nityanand Thakur", "village": "Mirzapur (Ballia Dist.)", "price": 1551 },
+  { "name": "Manvendra Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Sandeep Singh", "village": "Mohanapar", "price": 40 },
+  { "name": "Hiralal Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Bhalchandra Sah", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Guddu Kumar", "village": "Nayagaon", "price": 51 },
+  { "name": "Fauji Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Chandrika Yadav", "village": "Bheloli", "price": 110 },
+  { "name": "Shivji Prasad", "village": "Bhopatpur", "price": 101 },
+  { "name": "Manoj Singh", "village": "Barhiya", "price": 50 },
+
+  { "name": "Sudhir Singh", "village": "Barhiya", "price": 50 },
+  { "name": "Kamal Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Manir Ansari", "village": "Bhopatpur", "price": 101 },
+  { "name": "Jaimaram Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Piyare Chaudhary", "village": "Bhopatpur", "price": 51 }
+
+  { "name": "Vishal Gupta", "village": "Mohanapar", "price": 51 },
+  { "name": "Shyamdev Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Ritesh Kumar Sharma", "village": "Lamhi Tola (Tengariya Tola)", "price": 501 },
+  { "name": "Prem Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Umesh Singh", "village": "Nawaka Tola (Ludhpur)", "price": 110 },
+
+  { "name": "Malkhan Mishra", "village": "Mohanapar", "price": 50 },
+  { "name": "Sanjay Kumar (Master)", "village": "Deoria", "price": 101 },
+  { "name": "Gauri Ram", "village": "Kachhwa Mishr", "price": 51 },
+  { "name": "Dr. Dhananjay Sharma", "village": "Lamhi Tola", "price": 151 },
+  { "name": "Vishwanath Sharma", "village": "Rukna Tola Basti", "price": 251 },
+
+  { "name": "Surendra Sahu", "village": "Mohanapar", "price": 51 },
+  { "name": "Kamlesh Mishra", "village": "Singhe", "price": 51 },
+  { "name": "Rajmangal Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Shambhunath Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Madhuri Chaudhary", "village": "Itwa", "price": 101 },
+
+  { "name": "Faujdaar Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Janardan Singh", "village": "Bhopatpur (Atrauli)", "price": 51 },
+  { "name": "Sandip Yadav", "village": "Bhopatpur", "price": 51 },
+  { "name": "Bankim Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Vijay Singh", "village": "Barhiya", "price": 50 },
+
+  { "name": "Baleshwar Singh", "village": "Barhiya", "price": 50 },
+  { "name": "Shri Kapildev Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Premdev Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Gaurav Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Upendra Kushwaha", "village": "Diya Belwa", "price": 101 },
+
+  { "name": "Ankita Singh", "village": "Barhiya", "price": 50 },
+  { "name": "Maniram Sharma", "village": "Madhopur", "price": 251 },
+  { "name": "Hareram Sharma", "village": "Gurrah", "price": 51 },
+  { "name": "Baburam Singh", "village": "Barhiya", "price": 50 },
+  { "name": "Babulal Bhagat", "village": "Itwa", "price": 51 }
+
+
+  { "name": "Phoolchand Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Balram Dehati", "village": "Mohanapar", "price": 51 },
+  { "name": "Jitendra Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Amarendra Dehati", "village": "Mohanapar", "price": 51 },
+  { "name": "Ashokraj Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Chhotelal Bhagat", "village": "Mohanapar", "price": 51 },
+  { "name": "Vijay Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Munni Ji", "village": "Mohanapar", "price": 51 },
+  { "name": "Kishore Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Gujju Sharma", "village": "Jirwania", "price": 501 },
+
+  { "name": "Dilip Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Ramsangam Sharma", "village": "Bijli Bhedi", "price": 205 },
+  { "name": "Shivnandan Dehati", "village": "Bhopatpur", "price": 51 },
+  { "name": "Shri Lakhan Singh", "village": "Barhaj", "price": 50 },
+  { "name": "Shankar Sharma", "village": "Katha", "price": 201 },
+
+  { "name": "Bhola Sharma", "village": "Kusothi", "price": 500 },
+  { "name": "Balbhadra Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Shri Sah", "village": "Lalapar", "price": 51 },
+  { "name": "Ramagyaat Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Ramavatar Sharma (Dharmendra Sharma)", "village": "Naini Patti", "price": 151 },
+
+  { "name": "Baalbabu Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Prasar Ram", "village": "Pidan Tola (Singhe)", "price": 151 },
+  { "name": "Brajesh Kishor Singh (Birju)", "village": "Bhopatpur", "price": 101 },
+  { "name": "Balveer Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Amit Barnwal", "village": "Bhatni Chor", "price": 101 },
+
+  { "name": "Pawan Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Motu Rajkumar", "village": "Mohanapar", "price": 51 },
+  { "name": "Anand Rai", "village": "Bhopatpur", "price": 51 },
+  { "name": "Ashokraj Singh", "village": "Barhawa Mishr", "price": 51 },
+  { "name": "Ramagyan Singh (Anand)", "village": "Mohanapar", "price": 51 }
+
+
+  { "name": "Parmeshwar Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Vikas Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Shri Ramnarayan Singh", "village": "Barhiya", "price": 50 },
+  { "name": "Munnalal Sharma", "village": "Mohanapar", "price": 51 },
+  { "name": "Mehta Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Jai Bahadur Lal Gupta", "village": "Mohanapar", "price": 31 },
+  { "name": "Man Kishore Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Vishrama Singh", "village": "Barhiya", "price": 101 },
+  { "name": "Mriglal Sharma", "village": "Mohanapar", "price": 101 },
+  { "name": "Hariram Sharma", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Vijay Kumar Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Ajit Barnwal", "village": "Barhiya", "price": 51 },
+  { "name": "Rajendra Singh", "village": "Barhiya", "price": 101 },
+  { "name": "Shri Bhrister Ram", "village": "Bhopatpur", "price": 101 },
+  { "name": "Anup Gupta", "village": "Barhawa Mishra", "price": 61 },
+
+  { "name": "Brajesh Maurya", "village": "Barhiya", "price": 51 },
+  { "name": "Bharat Singh", "village": "Ameer Bari Barhawa", "price": 50 },
+  { "name": "Virbahadur Sah", "village": "Mohanapar", "price": 51 },
+  { "name": "Ratan Prasad", "village": "Chakra Bari", "price": 201 },
+  { "name": "Ali Husain", "village": "Mohanapar", "price": 55 },
+
+  { "name": "Ravindra Sharma (Sadhu)", "village": "Rampur", "price": 201 },
+  { "name": "Ramayan Sharma", "village": "Rampur", "price": 201 },
+  { "name": "Vimlanath Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Shivnath Yadav", "village": "Dharhara", "price": 251 },
+  { "name": "Rajeshyam Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Moinuddin Mohammad", "village": "Mohanapar", "price": 52 },
+  { "name": "Ramgati Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Ramji Singh", "village": "Diya Belwa", "price": 101 },
+  { "name": "Dinesh Yadav", "village": "Diya Mishra", "price": 101 },
+  { "name": "Manager Yadav", "village": "Diya Mishra", "price": 101 }
+
+
+  { "name": "Parmeshwar Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Vikas Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Shri Ramnarayan Singh", "village": "Barhiya", "price": 50 },
+  { "name": "Munnalal Sharma", "village": "Mohanapar", "price": 51 },
+  { "name": "Mehta Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Jai Bahadur Lal Gupta", "village": "Mohanapar", "price": 31 },
+  { "name": "Man Kishore Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Vishrama Singh", "village": "Barhiya", "price": 101 },
+  { "name": "Mriglal Sharma", "village": "Mohanapar", "price": 101 },
+  { "name": "Hariram Sharma", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Vijay Kumar Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Ajit Barnwal", "village": "Barhiya", "price": 51 },
+  { "name": "Rajendra Singh", "village": "Barhiya", "price": 101 },
+  { "name": "Shri Bhrister Ram", "village": "Bhopatpur", "price": 101 },
+  { "name": "Anup Gupta", "village": "Barhawa Mishra", "price": 61 },
+
+  { "name": "Brajesh Maurya", "village": "Barhiya", "price": 51 },
+  { "name": "Bharat Singh", "village": "Ameer Bari Barhawa", "price": 50 },
+  { "name": "Virbahadur Sah", "village": "Mohanapar", "price": 51 },
+  { "name": "Ratan Prasad", "village": "Chakra Bari", "price": 201 },
+  { "name": "Ali Husain", "village": "Mohanapar", "price": 55 },
+
+  { "name": "Ravindra Sharma (Sadhu)", "village": "Rampur", "price": 201 },
+  { "name": "Ramayan Sharma", "village": "Rampur", "price": 201 },
+  { "name": "Vimlanath Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Shivnath Yadav", "village": "Dharhara", "price": 251 },
+  { "name": "Rajeshyam Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Moinuddin Mohammad", "village": "Mohanapar", "price": 52 },
+  { "name": "Ramgati Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Ramji Singh", "village": "Diya Belwa", "price": 101 },
+  { "name": "Dinesh Yadav", "village": "Diya Mishra", "price": 101 },
+  { "name": "Manager Yadav", "village": "Diya Mishra", "price": 101 }
+
+
+  { "name": "Suresh Barnwal", "village": "Lalapar", "price": 51 },
+  { "name": "Motilal Sharma", "village": "Mohanapar", "price": 51 },
+  { "name": "Raju Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Yogendra Yadav", "village": "Singhe", "price": 101 },
+  { "name": "Ramkali Sharma", "village": "Mohanapar", "price": 100 },
+
+  { "name": "Lalji Dehati", "village": "Bhopatpur", "price": 51 },
+  { "name": "Upendra Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Parmanand Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Akhilesh Kumar Singh (Pintu)", "village": "Mohanapar", "price": 51 },
+  { "name": "Mritunjay Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Pintu Sharma", "village": "Rudrapur", "price": 250 },
+  { "name": "Suraj Kumar Pal", "village": "Rudrapur", "price": 101 },
+  { "name": "Sanjay Kumar Kushwaha", "village": "Rudrapur", "price": 101 },
+  { "name": "Shri Ram Bhagat", "village": "Barhiya", "price": 50 },
+  { "name": "Bhojraj Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Mahendra Singh", "village": "Mohanapar", "price": 100 },
+  { "name": "Madan Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Vyas Sah", "village": "Barhawa Mishra", "price": 51 },
+  { "name": "Mahesh Singh", "village": "Barhawa Mishra", "price": 51 },
+  { "name": "Jagat Singh", "village": "Mohanapar", "price": 50 },
+
+  { "name": "Suresh Kumar Sah", "village": "Dudhapar", "price": 101 },
+  { "name": "Shailendra Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Pawan Bhagat", "village": "Barhawa Mishra", "price": 51 },
+  { "name": "Ankit Kushwaha (Neta)", "village": "Deoria", "price": 101 },
+  { "name": "Mumtaz Ansari", "village": "Agheriya Barhawa", "price": 101 },
+
+  { "name": "Shivendra Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Pappu Prasad", "village": "Bhopatpur", "price": 51 },
+  { "name": "Bharat Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Amarnath Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Sitaram Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Satyendra Singh", "village": "Barhiya", "price": 51 },
+
+  { "name": "Ramkalyan Yadav", "village": "Bhopatpur", "price": 51 },
+  { "name": "Ramavtar Singh", "village": "Mohanapar", "price": 101 },
+  { "name": "Shyamlal Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Neeraj Yadav", "village": "Bhopatpur", "price": 50 },
+  { "name": "Babloo (Mahaveer Travels)", "village": "Bihari Bazar", "price": 101 },
+
+  { "name": "Binod Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Mangaldev Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Ramadhar Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Pramod Singh", "village": "Dhanjar Barhawa", "price": 51 },
+  { "name": "Sunil Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Maheshwar Sharma", "village": "Chhoriya Tola", "price": 100 },
+  { "name": "Dinesh Sharma", "village": "Barhiya", "price": 100 },
+  { "name": "Shivkumar Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Yogendra Sharma", "village": "Bijli Bhedi", "price": 101 },
+  { "name": "Mahesh Sharma", "village": "Bijli Bhedi", "price": 101 },
+
+  { "name": "Raju Chaudhary", "village": "Dharhara", "price": 51 },
+  { "name": "Rakesh Sharma", "village": "Barhawa Mishra", "price": 101 },
+  { "name": "Shashi Sharma", "village": "Mohanapar", "price": 51 },
+  { "name": "Ashish Kumar Kushwaha", "village": "Diya", "price": 101 },
+  { "name": "Sunil Kumar Mishra", "village": "Bihari Bazar", "price": 101 },
+
+  { "name": "Bharat Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Omprakash Singh", "village": "Atrauli", "price": 101 },
+  { "name": "Shivnath Singh", "village": "Atrauli", "price": 101 },
+  { "name": "Vijay Singh", "village": "Vishunpura", "price": 151 },
+  { "name": "Dr. Sanjay Kushwaha", "village": "Nawka Tola (Dudhapur)", "price": 201 },
+
+  { "name": "Anil Kushwaha", "village": "Barhiya", "price": 51 },
+  { "name": "Ramadhar Bhagat", "village": "Mohanapar", "price": 51 },
+  { "name": "Ramankit Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Dharam Singh", "village": "Mohanapar", "price": 201 },
+  { "name": "Kapil Singh", "village": "Mohanapar", "price": 51 }
+
+
+  { "name": "Ramkeshwar Bhagat", "village": "Barhiya", "price": 50 },
+  { "name": "Kiran Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Raghunath Sharma", "village": "Mohanapar", "price": 52 },
+  { "name": "Ramanand Sharma", "village": "Mohanapar", "price": 101 },
+
+  { "name": "Ajit Kumar Kushwaha", "village": "Sikati Bazar", "price": 51 },
+  { "name": "Ramnaresh Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Harishankar Sah", "village": "Bhithagawan", "price": 51 },
+  { "name": "Santosh Sah", "village": "Bhithagawan", "price": 51 },
+
+  { "name": "Tapeshwar Pal", "village": "Dharhara (Bhediya Tola)", "price": 51 },
+  { "name": "Navin Singh", "village": "Bhopatpur Nawka Tola", "price": 51 },
+  { "name": "Dhananjay Bhagat", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Ramavtar Sah", "village": "Barhawa Mishra", "price": 101 },
+  { "name": "Prem Sharma", "village": "Barhawa Mishra", "price": 111 },
+  { "name": "Ajit (Medical Store)", "village": "Lalapar Pokhara", "price": 101 },
+
+  { "name": "Ramdev Bhagat", "village": "Barhawa Mishra", "price": 51 },
+  { "name": "Banshraj Barnwal", "village": "Lalapar", "price": 51 },
+  { "name": "Dilip Singh", "village": "Gopalpur", "price": 101 },
+
+  { "name": "Shivnath Pal", "village": "Bhediya Tola", "price": 51 },
+  { "name": "Mahesh Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Mahendra Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Deva Singh", "village": "Dudhipur (Nawka Tola)", "price": 101 },
+  { "name": "Harishankar Pal", "village": "Bhediya Tola", "price": 51 },
+  { "name": "Pintu Yadav (BDC)", "village": "Malpur Bazar", "price": 101 },
+
+  { "name": "Ramashray Kushwaha (Pintu)", "village": "Mohanapar", "price": 51 },
+  { "name": "Rajesh Maurya", "village": "Barhiya", "price": 51 },
+  { "name": "Chandrapati Pal", "village": "Bhediya Tola", "price": 51 },
+
+  { "name": "Brajesh Giri", "village": "Giri Baba Pipra", "price": 101 },
+  { "name": "Dharmendra Kushwaha", "village": "Sikati", "price": 51 },
+  { "name": "Vishwanath Mishra", "village": "Sikati Upper Tola", "price": 51 },
+
+  { "name": "Ramkumar Singh (Deenath)", "village": "Nawka Tola", "price": 100 }
+
+
+  { "name": "Rajkeshwar Maurya", "village": "Barhiya", "price": 50 },
+  { "name": "Shyam Singh (Lallu Singh)", "village": "Mohanapar", "price": 51 },
+  { "name": "Vinod Mishra", "village": "Sikati", "price": 100 },
+  { "name": "Arvind Singh", "village": "Mohanapar", "price": 50 },
+  { "name": "Ramawati Devi", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Virendra Prasad", "village": "Bhopatpur", "price": 51 },
+  { "name": "Sachchidanand Singh", "village": "Barhiya", "price": 101 },
+  { "name": "Ajay Patel", "village": "Barhawa", "price": 51 },
+  { "name": "Raju Gupta", "village": "Mohanapar", "price": 101 },
+  { "name": "Akhilesh Singh", "village": "Gopalpur (Atrauli)", "price": 51 },
+
+  { "name": "Ramkumar Dehati", "village": "Mohanapar", "price": 50 },
+  { "name": "Harishchandra Sharma", "village": "Kuriya", "price": 201 },
+  { "name": "Nityanand Prasad", "village": "Bhopatpur", "price": 51 },
+  { "name": "Ramashankar Prasad", "village": "Mohanapar", "price": 51 },
+  { "name": "Upendra Kumar Dehati", "village": "Mohanapar", "price": 101 },
+
+  { "name": "Anshuman Kumar", "village": "Dharhara", "price": 51 },
+  { "name": "Manoj Prasad", "village": "Bhopatpur", "price": 51 },
+  { "name": "Navjivan Sharma", "village": "Itwa", "price": 201 },
+  { "name": "Manoj Sah", "village": "Mohanapar", "price": 51 },
+  { "name": "Raghunath Pal", "village": "Bhediya Tola", "price": 51 },
+
+  { "name": "Shri Mannu Ji Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Shri Bhola Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Munna Yadav", "village": "Dharhara", "price": 101 },
+  { "name": "Roshan Sah", "village": "Diya Belwa", "price": 101 },
+  { "name": "Munna Yadav", "village": "Dudhiapur", "price": 101 },
+
+  { "name": "Chandresh Prasad", "village": "Nawka Tola Dudhapur", "price": 100 },
+  { "name": "Jitendra Gupta", "village": "Dharhara", "price": 51 },
+  { "name": "Tribhuvan Gupta", "village": "Dharhara", "price": 100 },
+  { "name": "Shri Dhanpati Sah", "village": "Barhawa Mishra", "price": 50 },
+  { "name": "Subhash Singh", "village": "Mohanapar", "price": 50 },
+
+  { "name": "Rampravesh Singh", "village": "Mohanapar", "price": 50 }
+
+
+  { "name": "Ajay Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Ashok Sharma", "village": "Mohanapar", "price": 51 },
+  { "name": "Javed Husain", "village": "Dharhara", "price": 50 },
+  { "name": "Suresh Pal", "village": "Dharhara Bhediya Tola", "price": 51 },
+  { "name": "Lakshman Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Jairam Singh", "village": "Barhiya", "price": 51 },
+  { "name": "Dr. Madhav Singh", "village": "Mohanapar", "price": 151 },
+  { "name": "Jagat Chaurasia", "village": "Barhawa Mishra", "price": 51 },
+  { "name": "Vijay Singh", "village": "Bhopatpur", "price": 51 },
+  { "name": "Omprakash Gupta", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Parashuram Sharma", "village": "Mohanapar", "price": 51 },
+  { "name": "Ramkumar Sah", "village": "Barhawa Mishra", "price": 151 },
+  { "name": "Kashi Dehati", "village": "Mohanapar", "price": 51 },
+  { "name": "Ramadhar Sah", "village": "Barhawa Mishra", "price": 51 },
+  { "name": "Surendra Sharma", "village": "Samarhiya", "price": 102 },
+
+  { "name": "Suresh Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Sanjay Singh (Lava Bhais)", "village": "Mohanapar", "price": 104 },
+  { "name": "Mallar Ji Barnwal (Kirana Dukaan)", "village": "Lalapar Bazar", "price": 101 },
+  { "name": "Sanjay Bhagat", "village": "Bhopatpur", "price": 51 },
+  { "name": "Ramkumar Singh (Medical)", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Dr. Ramdhyan Singh", "village": "Mohanapar", "price": 101 },
+  { "name": "Birju Sah", "village": "Karmasi", "price": 51 },
+  { "name": "Rajendra Singh", "village": "Mohanapar", "price": 101 },
+  { "name": "Raghunath Sharma", "village": "Mohanapar", "price": 51 },
+  { "name": "Dr. Brijesh Singh", "village": "Lalapar", "price": 101 },
+
+  { "name": "Govinda Sah", "village": "Mohanapar", "price": 51 },
+  { "name": "Bholu Sahni", "village": "Karmasi", "price": 101 },
+  { "name": "Shivshankar Sharma", "village": "Kanchanwa", "price": 151 },
+  { "name": "Vijay Vihari Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Santosh Sharma", "village": "Kataiya", "price": 501 }
+
+
+  { "name": "Vijay Narayan Singh", "village": "Diya Belwa", "price": 101 },
+  { "name": "Parmeshwar Kushwaha", "village": "Diya Belwa", "price": 101 },
+  { "name": "Shri Nagendra Prasad", "village": "Diya Belwa", "price": 101 },
+  { "name": "Rameshwar Dehati", "village": "Mohanapar", "price": 51 },
+  { "name": "Mukesh Dehati", "village": "Barhiya Tola", "price": 51 },
+
+  { "name": "Manta Devi (Teacher)", "village": "Barhawa Mishra", "price": 51 },
+  { "name": "Surajpal Singh", "village": "Nawka Tola", "price": 101 },
+  { "name": "Rakesh Sharma", "village": "Parasiya", "price": 100 },
+  { "name": "Shambhunath", "village": "Diya Mishra", "price": 111 },
+  { "name": "Sukhlal Sharma", "village": "Koidari Buzurg", "price": 501 },
+
+  { "name": "Ajay Kushwaha", "village": "Diya", "price": 101 },
+  { "name": "Gyan Sharma", "village": "Dudhaiya", "price": 105 },
+  { "name": "Harendra Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Ramanand Singh", "village": "Barhawa Mishra", "price": 51 },
+  { "name": "Dhananjay Singh", "village": "Mohanapar", "price": 51 },
+
+  { "name": "Upendra Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Gokul Bhagat", "village": "Lalapar", "price": 50 },
+  { "name": "Anil Kumar Singh", "village": "Kanchanpur", "price": 501 },
+  { "name": "Ramesh Yadav", "village": "Deoria", "price": 101 },
+  { "name": "Gajanan Singh", "village": "Singhpur", "price": 100 },
+
+  { "name": "Ramvilas Sharma", "village": "Bijli Bhedi", "price": 101 },
+  { "name": "Deepak Sharma", "village": "Gorakhpur", "price": 51 },
+  { "name": "Baleshwar Mishra", "village": "Dharhara", "price": 100 },
+  { "name": "Bhushan Yadav", "village": "Barhawa Mishra", "price": 51 },
+  { "name": "Sarvadanand Sah", "village": "Fazilnagar", "price": 201 },
+
+  { "name": "Ashok Ji Barnwal", "village": "Sikati Bazar", "price": 51 },
+  { "name": "Munna Singh (Medical)", "village": "Nawka Tola", "price": 101 },
+  { "name": "Indradev Singh", "village": "Nawka Tola", "price": 101 },
+  { "name": "Munna Kumar Sah", "village": "Netua", "price": 51 },
+  { "name": "Ramesh Singh", "village": "Netua", "price": 51 }
+
+
+
+  { "name": "Dayanand Singh", "village": "Dudhai", "price": 51 },
+  { "name": "Shital Singh", "village": "Mohanapar", "price": 51 },
+  { "name": "Vijay Sharma", "village": "Bhathni", "price": 101 },
+  { "name": "Vishwanath Singh", "village": "Jagdishpur (Barhawa)", "price": 51 },
+  { "name": "Chandan Patel", "village": "Barhawa", "price": 101 },
+
+  { "name": "Pradeep Sharma", "village": "Fatehpur", "price": 251 },
+  { "name": "Lallan Babu Sharma", "village": "Amwa", "price": 251 },
+  { "name": "Surendra Sharma", "village": "Bela Mehra", "price": 500 },
+  { "name": "Rakesh Sharma", "village": "Gopalganj", "price": 251 },
+  { "name": "Shambhu Sharma", "village": "Fatehpur", "price": 50 },
+
+  { "name": "Sandeep Sharma", "village": "Gorakhpur", "price": 50 },
+  { "name": "Vinay Sharma", "village": "Barhawa", "price": 251 },
+  { "name": "Munna Sharma", "village": "Ayodhya", "price": 551 },
+  { "name": "Baleshwar Sah", "village": "Mohanapar", "price": 101 },
+  { "name": "Devila Sah", "village": "Chakwa", "price": 50 },
+
+  { "name": "Channu Gupta", "village": "Mohanapar", "price": 100 },
+  { "name": "Surendra (Medical)", "village": "Bhediya Tola", "price": 101 },
+  { "name": "Rajesh Singh", "village": "Dharhara", "price": 151 },
+  { "name": "Shyama Kanhaiya", "village": "Mahdeva", "price": 501 },
+  { "name": "Mahesh Mishra", "village": "Dharhara", "price": 40 },
+
+  { "name": "Manoj Sharma", "village": "Barhawa", "price": 251 },
+  { "name": "Ramesh Sharma", "village": "Ranchi", "price": 2100 },
+  { "name": "Pradeep Gupta", "village": "Mauza", "price": 502 },
+  { "name": "Surendra Sharma (Baba)", "village": "Ajaypur Pipra", "price": 201 },
+  { "name": "Vikrant Sah", "village": "Basti", "price": 501 },
+
+  { "name": "Kalawati", "village": "Sah", "price": 100 },
+  { "name": "Suresh Sharma", "village": "Rampur", "price": 300 },
+  { "name": "Surendra Sharma", "village": "Bahuar", "price": 151 },
+  { "name": "Ashok Sharma", "village": "Kanpur", "price": 551 }
+
+
+  {
+    "name": "B.K. Sharma",
+    "village": "Unknown",
+    "price": 2100,
+    "note": "Aarti / Special entry"
+  },
+  {
+    "name": "Unknown Entry",
+    "village": "Unknown",
+    "price": 101,
+    "note": "Extra note"
+  },
+  {
+    "name": "Unknown Entry",
+    "village": "Unknown",
+    "price": 251,
+    "note": "Extra note"
+  }
+
+
+  { "name": "Jaimprakash Mishra", "village": "Dharhara", "price": 101 },
+  { "name": "Jayanti Gond", "village": "Dhelahiya", "price": 251 },
+  { "name": "Pramod Singh", "village": "Kalani", "price": 51 },
+  { "name": "Ramprakash Sharma", "village": "Fakra Sewa", "price": 250 }
+
+  { "name": "Fauji Sah", "village": "Nagri Dihap", "price": 100 },
+  { "name": "Ramashankar Sharma", "village": "Fatehpur", "price": 200 },
+  { "name": "Kalawati (Suresh Sah)", "village": "Unknown", "price": 100 },
+  { "name": "Surendra Sharma (Lola)", "village": "Ajgara Pipra", "price": 100 },
+  { "name": "Pradeep Gupta", "village": "Mauza", "price": 100 },
+
+  { "name": "Shyama Sharma", "village": "Kanchanpur", "price": 100 },
+  { "name": "Sunita Sharma", "village": "Amwa", "price": 100 },
+  { "name": "Shobha Sharma", "village": "Dudhi Belwa", "price": 100 },
+  { "name": "Nilu Sharma", "village": "Kodari Buzurg", "price": 101 },
+  { "name": "Manoj Maurya", "village": "Nagri Dihap", "price": 100 },
+
+  { "name": "Aman Sharma", "village": "Nagri Dihap", "price": 201 }
