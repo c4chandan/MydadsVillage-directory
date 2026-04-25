@@ -20,8 +20,8 @@
     --radius-xl: 32px;
     --radius-full: 9999px;
     --font: 'Inter', 'Noto Sans Devanagari', system-ui, -apple-system, sans-serif;
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
-    --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.2);
+    --shadow-sm: 0 2px 4px var(--accent-glow);
+    --shadow-md: 0 8px 20px var(--accent-glow);
     --shadow-glow: 0 0 20px rgba(255, 107, 0, 0.15);
 }
 
@@ -321,7 +321,7 @@ input, button, select, textarea {
     background: var(--surface-elevated);
     border: 1px solid var(--border-light);
     border-radius: var(--radius-lg);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 32px var(--accent-glow);
     max-height: 300px;
     overflow-y: auto;
     z-index: 110;
@@ -488,7 +488,7 @@ input, button, select, textarea {
     border-radius: var(--radius-lg);
     z-index: 1000;
     padding: 16px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5), var(--shadow-glow);
+    box-shadow: 0 12px 40px var(--accent-glow);
     transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
     display: none;
 }
@@ -794,7 +794,7 @@ mark {
 .card:hover {
     border-color: var(--accent-dim);
     transform: translateY(-4px) scale(1.01);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 24px var(--accent-glow);
 }
 
 .btn-submit, .btn-view-all, .nav-btn, .chip, .mic-btn {
