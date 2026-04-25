@@ -77,12 +77,13 @@
     <div id="homeView">
         <div class="search-area">
             <div class="search-box">
-                <i data-lucide="search" style="color:var(--text-dim);width:20px;height:20px;flex-shrink:0;margin-left:4px"></i>
-                <input type="text" id="mainSearch" placeholder="Search by name or village..." autocomplete="off" spellcheck="false">
-                <button class="mic-btn" id="voiceBtn" title="Voice Search" aria-label="Voice Search">
+                <span class="gradient-border"></span>
+                <i data-lucide="search" style="color:var(--text-dim);width:20px;height:20px;flex-shrink:0;margin-left:4px;z-index:2"></i>
+                <input type="text" id="mainSearch" placeholder="Search by name or village..." autocomplete="off" spellcheck="false" style="z-index:2">
+                <button class="mic-btn" id="voiceBtn" title="Voice Search" aria-label="Voice Search" style="z-index:2">
                     <i data-lucide="mic" style="width:20px;height:20px"></i>
                 </button>
-                <button class="search-action-btn" onclick="triggerSearch()">
+                <button class="search-action-btn" onclick="triggerSearch()" style="z-index:2">
                     <i data-lucide="arrow-right" style="width:20px;height:20px"></i>
                 </button>
             </div>
