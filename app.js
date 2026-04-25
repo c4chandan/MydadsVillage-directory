@@ -297,10 +297,10 @@ function cardHTML(r, query, showAdmin) {
         : '';
     const adminHTML = showAdmin ? `
         <div class="admin-actions" style="margin-top:12px; display:flex; gap:8px;">
-            <button class="btn-sm btn-edit" onclick="editRecord(${r.id})" style="background:var(--surface-elevated); color:white; border:1px solid var(--border-light); padding:6px 12px; border-radius:var(--radius-md); font-size:0.75rem; font-weight:700; cursor:pointer;">
+            <button class="btn-sm btn-edit" onclick="editRecord(${r.id})" style="background:rgba(255,255,255,0.08); color:white; border:1px solid rgba(255,255,255,0.15); padding:6px 12px; border-radius:var(--radius-md); font-size:0.75rem; font-weight:700; cursor:pointer;">
                 ${t('edit')}
             </button>
-            <button class="btn-sm btn-del" onclick="deleteRecord(${r.id})" style="background:var(--danger-dim); color:var(--danger); border:1px solid transparent; padding:6px 12px; border-radius:var(--radius-md); font-size:0.75rem; font-weight:700; cursor:pointer;">
+            <button class="btn-sm btn-del" onclick="deleteRecord(${r.id})" style="background:rgba(255,255,255,0.05); color:var(--danger); border:1px solid rgba(255,255,255,0.1); padding:6px 12px; border-radius:var(--radius-md); font-size:0.75rem; font-weight:700; cursor:pointer;">
                 ${t('delete')}
             </button>
         </div>` : '';
@@ -389,10 +389,10 @@ function renderAdmin(data) {
         <div class="admin-controls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
             <h2 style="font-weight:800; font-size:1.4rem;">${t('manage')}</h2>
             <div class="admin-btn-group" style="display:flex; gap:8px;">
-                <button class="btn-sm" onclick="exportData()" style="background:var(--surface-elevated); color:white; border:1px solid var(--border-light); padding:10px 16px; border-radius:var(--radius-md); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <button class="btn-sm" onclick="exportData()" style="background:rgba(255,255,255,0.08); color:white; border:1px solid rgba(255,255,255,0.15); padding:10px 16px; border-radius:var(--radius-md); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
                     <i data-lucide="download" style="width:16px; height:16px;"></i> ${t('backup')}
                 </button>
-                <button class="btn-sm" onclick="importData()" style="background:var(--surface-elevated); color:white; border:1px solid var(--border-light); padding:10px 16px; border-radius:var(--radius-md); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <button class="btn-sm" onclick="importData()" style="background:rgba(255,255,255,0.08); color:white; border:1px solid rgba(255,255,255,0.15); padding:10px 16px; border-radius:var(--radius-md); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
                     <i data-lucide="upload" style="width:16px; height:16px;"></i> ${t('load')}
                 </button>
             </div>
@@ -413,7 +413,7 @@ function renderAdmin(data) {
             </div>
         </div>
 
-        <div class="search-box" style="margin-bottom:24px; border-radius:var(--radius-md);">
+        <div class="search-box" style="margin-bottom:24px;">
             <i data-lucide="search" style="color:var(--text-dim);width:20px;height:20px;flex-shrink:0"></i>
             <input type="text" id="adminSearch" placeholder="${t('adminSearch')}"
                    autocomplete="off" spellcheck="false">

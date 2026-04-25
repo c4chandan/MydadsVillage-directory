@@ -1,7 +1,7 @@
 :root {
     --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface-elevated: #242424;
+    --surface: rgba(255, 255, 255, 0.03);
+    --surface-elevated: rgba(255, 255, 255, 0.06);
     --surface-glass: rgba(20, 20, 20, 0.7);
     --accent: #ff7a00;
     --accent-light: #ff9d4d;
@@ -10,8 +10,8 @@
     --text: #ffffff;
     --text-secondary: #9ca3af;
     --text-dim: #6b7280;
-    --border: #1f1f1f;
-    --border-light: #2d2d2d;
+    --border: rgba(255, 255, 255, 0.05);
+    --border-light: rgba(255, 255, 255, 0.1);
     --danger: #ef4444;
     --danger-dim: rgba(239, 68, 68, 0.1);
     --radius-sm: 8px;
