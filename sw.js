@@ -1,11 +1,11 @@
-const CACHE_NAME = 'village-dir-v4';
+const CACHE_NAME = 'village-dir-v6';
 const ASSETS = [
     './',
-    './index.html',
-    './styles.css',
-    './app.js',
-    './manifest.json',
-    './public/entries.json'
+    './index.html?v=6',
+    './styles.css?v=6',
+    './app.js?v=6',
+    './manifest.json?v=6',
+    './public/entries.json?v=6'
 ];
 
 self.addEventListener('install', (event) => {

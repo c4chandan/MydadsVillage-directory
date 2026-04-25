@@ -20,10 +20,23 @@
 
 <div class="app">
 
-    <!-- Install Banner -->
-    <div class="install-banner" id="installBanner">
-        <span id="installText">Install this app on your phone</span>
-        <button id="installBtn" onclick="installPWA()">Install</button>
+    <!-- Premium Install Prompt (Floating) -->
+    <div class="install-prompt" id="installBanner">
+        <div class="install-content">
+            <div class="install-icon">
+                <i data-lucide="download-cloud"></i>
+            </div>
+            <div class="install-text">
+                <strong id="installText">Install Directory App</strong>
+                <p id="installSubtext">Fast, offline & ready on your home screen</p>
+            </div>
+            <button class="btn-install-now" id="installBtn" onclick="installPWA()">
+                <span id="installBtnLabel">Install</span>
+            </button>
+            <button class="btn-close-prompt" onclick="document.getElementById('installBanner').style.display='none'">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Header -->
@@ -162,7 +175,20 @@
     </div>
 </div>
 
-<!-- ════════ Login Modal ════════ -->
+<!-- ════════ Confirmation Modal ════════ -->
+<div class="modal-bg" id="confirmModal">
+    <div class="modal confirm-card">
+        <div class="confirm-icon" id="confirmIcon">
+            <i data-lucide="alert-triangle"></i>
+        </div>
+        <h2 id="confirmTitle">Confirm Action</h2>
+        <p id="confirmMsg" style="color:var(--text-secondary); margin-bottom:24px;"></p>
+        <div style="display:flex; gap:12px;">
+            <button class="btn-submit" style="background:var(--surface-elevated); border:1px solid var(--border-light); flex:1" id="confirmCancelBtn" onclick="resolveConfirm(false)">Cancel</button>
+            <button class="btn-submit" style="background:var(--danger); flex:1" id="confirmOkBtn" onclick="resolveConfirm(true)">Delete</button>
+        </div>
+    </div>
+</div>
 <div class="modal-bg" id="loginModal">
     <div class="modal login-card">
         <i data-lucide="shield-check" style="width:64px;height:64px;margin-bottom:20px;color:var(--accent)"></i>
@@ -183,7 +209,7 @@
 
 <script>
     // Simple cache busting: refresh if version mismatch
-    const APP_VERSION = '4.0';
+    const APP_VERSION = '6.0';
     if (localStorage.getItem('app_version') !== APP_VERSION) {
         localStorage.setItem('app_version', APP_VERSION);
         if ('serviceWorker' in navigator) {

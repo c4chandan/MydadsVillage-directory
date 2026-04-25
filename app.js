@@ -23,7 +23,7 @@ const LANG = {
         enterPin: "Admin Login", pinSubtext: "Secure access for management",
         login: "Sign In", back: "Cancel", wrongPin: "Invalid User ID or Password!",
         totalRecords: "Total Records", totalAmount: "Total Amount", villages: "Villages",
-        install: "Install App", installText: "Install this app on your phone",
+        install: "Install Directory App", installText: "Fast, offline & ready on your home screen",
         adminSearch: "Search records...", langBtn: "हिंदी",
         loading: "Loading records...", resultsFound: "results found",
         recentEntries: "Recent Entries",
@@ -57,7 +57,7 @@ const LANG = {
         enterPin: "एडमिन लॉगिन", pinSubtext: "मैनेजमेंट के लिए सुरक्षित लॉगिन",
         login: "लॉगिन करें", back: "रद्द करें", wrongPin: "गलत आईडी या पासवर्ड!",
         totalRecords: "कुल रिकॉर्ड", totalAmount: "कुल राशि", villages: "गाँव",
-        install: "ऐप इंस्टॉल", installText: "ऐप को फोन में इंस्टॉल करें",
+        install: "ऐप इंस्टॉल करें", installText: "तेज़, ऑफलाइन और आपकी होम स्क्रीन पर तैयार",
         adminSearch: "रिकॉर्ड खोजें...", langBtn: "English",
         loading: "रिकॉर्ड लोड हो रहे हैं...", resultsFound: "रिकॉर्ड मिले",
         recentEntries: "हाल के रिकॉर्ड",
@@ -153,6 +153,14 @@ function applyLang() {
     
     const va = document.getElementById('voiceAddText');
     if (va) va.textContent = t('voiceAdd');
+
+    // Install Banner
+    const it = document.getElementById('installText');
+    const is = document.getElementById('installSubtext');
+    const il = document.getElementById('installBtnLabel');
+    if (it) it.textContent = t('install');
+    if (is) is.textContent = t('installText');
+    if (il) il.textContent = t('install');
 }
 
 
@@ -624,9 +632,29 @@ document.getElementById('recordForm').onsubmit = (e) => {
     showToast(t('saved'));
 };
 
+// ════════════════════════════════════════════════
+// Custom Confirm Dialog
+// ════════════════════════════════════════════════
+let confirmPromiseRes;
+function showConfirm(msg, title = "Confirm") {
+    const modal = document.getElementById('confirmModal');
+    document.getElementById('confirmMsg').textContent = msg;
+    document.getElementById('confirmTitle').textContent = title;
+    modal.classList.add('open');
+    return new Promise(res => {
+        confirmPromiseRes = res;
+    });
+}
+
+function resolveConfirm(val) {
+    document.getElementById('confirmModal').classList.remove('open');
+    if (confirmPromiseRes) confirmPromiseRes(val);
+}
+
 window.editRecord   = (id) => openModal(id);
-window.deleteRecord = (id) => {
-    if (confirm(t('confirmDelete'))) {
+window.deleteRecord = async (id) => {
+    const ok = await showConfirm(t('confirmDelete'));
+    if (ok) {
         records = records.filter(x => x.id !== id);
         saveRecords();
         renderAdmin();
@@ -634,6 +662,9 @@ window.deleteRecord = (id) => {
         showToast(t('deleted'));
     }
 };
+
+window.resolveConfirm = resolveConfirm;
+
 
 
 // ════════════════════════════════════════════════
@@ -787,7 +818,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
     const banner = document.getElementById('installBanner');
-    if (banner) banner.style.display = 'flex';
+    if (banner) banner.classList.add('show');
 });
 
 window.installPWA = async () => {
@@ -796,7 +827,7 @@ window.installPWA = async () => {
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
         const banner = document.getElementById('installBanner');
-        if (banner) banner.style.display = 'none';
+        if (banner) banner.classList.remove('show');
     }
     deferredPrompt = null;
 };
