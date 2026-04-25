@@ -222,28 +222,27 @@ input, button, select, textarea {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(3, 3, 3, 0.95);
-    backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 16px 0 12px;
     margin-bottom: 8px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .search-box {
     display: flex;
     align-items: center;
-    background: var(--surface-elevated);
-    border: 1px solid var(--border-light);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-xl);
-    padding: 6px 18px;
+    padding: 4px 4px 4px 16px;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .search-box:focus-within {
     border-color: var(--accent);
-    background: #1a1a1a;
-    box-shadow: var(--shadow-glow);
-    transform: scale(1.01);
+    box-shadow: 0 0 0 1px var(--accent-glow), var(--shadow-glow);
 }
 
 .search-box input {
