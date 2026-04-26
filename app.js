@@ -3,17 +3,15 @@
 // ════════════════════════════════════════════════
 
 // Supabase initialization
-let supabaseClient = null;
 const STORAGE_KEY = 'village_directory_db';
-
-const LANG = {
 let records = [];
 let currentSort = 'newest';
 let browseSortMode = 'newest';
 let currentView = 'home';
 let deferredPrompt;
 const HOME_LIMIT = 8;
-    en: {
+
+const LANG = {
         title: 'Find Records <span style="color:var(--accent)">Instantly</span>',
         subtitle: "Transform handwritten records into a powerful digital search experience.",
         searchPlaceholder: "Search by name or village...",
