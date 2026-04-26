@@ -196,35 +196,60 @@ async function loadRecords() {
     const list = document.getElementById('resultsList');
     list.innerHTML = `<div class="spinner"></div><p style="text-align:center;color:var(--text-dim)">${t('loading')}</p>`;
 
-    // Try Supabase first - ONLY if config is set
-    if (window.SUPABASE_URL && window.SUPABASE_URL.includes('supabase')) {
+    // ALWAYS try Supabase first
+    if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
         try {
-            console.log('Trying Supabase...');
-            const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const { data, error } = await client
+            console.log('Trying Supabase with URL:', window.SUPABASE_URL);
+            const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+            
+            // Test fetch
+            const { data, error, count } = await client
                 .from('records')
-                .select('*')
-                .order('created_at', { ascending: false });
+                .select('*', { count: 'exact' });
             
-            console.log('Supabase response:', { error, count: data?.length });
+            console.log('Supabase response:', { error, count, data });
             
-            if (!error && data && data.length > 0) {
+            if (error) {
+                console.log('Supabase error:', error.message);
+                list.innerHTML = `<div class="empty-state"><i data-lucide="alert-circle"></i><p>DB Error: ${error.message}</p></div>`;
+                lucide.createIcons();
+                return;
+            }
+            
+            if (data && data.length > 0) {
                 records = data.map(r => ({
                     id: r.id,
                     name: r.name,
                     village: r.village,
-                    price: r.price,
+                    price: r.price || 0,
                     note: r.note || '',
                     ts: r.created_at ? new Date(r.created_at).getTime() : Date.now()
                 }));
                 console.log('✅ Loaded from Supabase:', records.length);
                 saveRecords();
-                renderHome();
-                return;
-            }
+renderHome();
+            return;
         } catch (e) {
-            console.log('Supabase error:', e.message);
         }
+
+        // Fallback to localStorage
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try { records = JSON.parse(stored); } catch (e) { records = []; }
+            console.log('Loaded from localStorage:', records.length);
+            updateStats();
+            renderHome();
+            return;
+        }
+            
+            list.innerHTML = `<div class="empty-state"><i data-lucide="database"></i><p>No records in database</p></div>`;
+            lucide.createIcons();
+            return;
+        } catch (e) {
+            console.log('Supabase exception:', e.message);
+        }
+    } else {
+        console.log('Supabase not configured');
     }
 
     // Fallback to localStorage
@@ -268,19 +293,17 @@ function getNextId() {
 
 // ════════════════════════════════════════════════
 // Stats (Admin Only)
-// ════════════════════════════════════════════════
 function updateStats() {
     const total = records.length;
     const amount = records.reduce((s, r) => s + (r.price || 0), 0);
-    const villages = new Set(records.map(r => r.village.trim()).filter(Boolean)).size;
     
     const sRec = document.getElementById('statRecords');
-    const sAmt = document.getElementById('statAmount');
-    const sVil = document.getElementById('statVillages');
+    const sRecVal = document.getElementById('statRecordsVal');
+    const sSource = document.getElementById('statSource');
     
     if (sRec) sRec.textContent = total;
-    if (sAmt) sAmt.textContent = '₹' + amount.toLocaleString('en-IN');
-    if (sVil) sVil.textContent = villages;
+    if (sRecVal) sRecVal.textContent = total > 0 ? total : '-';
+    if (sSource) sSource.textContent = window.SUPABASE_URL ? 'Cloud' : 'Local';
 }
 
 
