@@ -196,14 +196,17 @@ async function loadRecords() {
     const list = document.getElementById('resultsList');
     list.innerHTML = `<div class="spinner"></div><p style="text-align:center;color:var(--text-dim)">${t('loading')}</p>`;
 
-    // Try Supabase first
-    if (window.supabase) {
+    // Try Supabase first - ONLY if config is set
+    if (window.SUPABASE_URL && window.SUPABASE_URL.includes('supabase')) {
         try {
+            console.log('Trying Supabase...');
             const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             const { data, error } = await client
                 .from('records')
                 .select('*')
                 .order('created_at', { ascending: false });
+            
+            console.log('Supabase response:', { error, count: data?.length });
             
             if (!error && data && data.length > 0) {
                 records = data.map(r => ({
@@ -212,14 +215,15 @@ async function loadRecords() {
                     village: r.village,
                     price: r.price,
                     note: r.note || '',
-                    ts: new Date(r.created_at).getTime()
+                    ts: r.created_at ? new Date(r.created_at).getTime() : Date.now()
                 }));
+                console.log('✅ Loaded from Supabase:', records.length);
                 saveRecords();
                 renderHome();
                 return;
             }
         } catch (e) {
-            console.log('Supabase not available, using local data');
+            console.log('Supabase error:', e.message);
         }
     }
 
@@ -227,6 +231,7 @@ async function loadRecords() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
         try { records = JSON.parse(stored); } catch (e) { records = []; }
+        console.log('Loaded from localStorage:', records.length);
         renderHome();
         return;
     }
