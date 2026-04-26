@@ -197,10 +197,10 @@ async function loadRecords() {
     list.innerHTML = `<div class="spinner"></div><p style="text-align:center;color:var(--text-dim)">${t('loading')}</p>`;
 
     // Try Supabase first
-    if (window.supabase && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+    if (window.supabase) {
         try {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const { data, error } = await supabaseClient
+            const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const { data, error } = await client
                 .from('records')
                 .select('*')
                 .order('created_at', { ascending: false });
