@@ -1,58 +1,70 @@
-# 📘 Digital Record Search App
+# MyDad's Village Directory
 
-This project is a simple and practical web application designed to convert handwritten notebook records into a fast and searchable digital system. It was built with a real-world use case in mind — helping non-technical users quickly find information without manually scanning pages.
+A premium, mobile-first web app for searching handwritten village records.
 
-## 🚀 Features
+## 🚀 Quick Start
 
-- 🔍 **Instant Search**  
-  Search by name or village with real-time filtering.
+```bash
+npm install
+npm run dev
+```
 
-- 🎤 **Voice Search**  
-  Speak instead of typing using built-in browser speech recognition.
+Open http://localhost:3000
 
-- 📱 **Mobile Friendly**  
-  Clean, responsive design that works smoothly on phones.
+## 🔧 Configuration
 
-- ⚡ **Fast Performance**  
-  Loads data once and filters instantly without delays.
+### Supabase Setup (Optional)
 
-- 📄 **Structured Data**  
-  Uses a JSON file (`/public/entries.json`) for easy data management.
+1. Create a project at [supabase.com](https://supabase.com)
+2. Create a table called `records` with columns:
+   - `id` (auto-generated)
+   - `name` (text)
+   - `village` (text)
+   - `price` (number)
+   - `note` (text, optional)
+   - `created_at` (timestamp)
 
-## 🧠 How It Works
+3. Add your credentials to `supabase-config.js`:
+```javascript
+const SUPABASE_URL = 'your-url';
+const SUPABASE_ANON_KEY = 'your-key';
+```
 
-All handwritten records are converted into structured JSON format.  
-The app fetches this data and allows users to search through it using simple text input or voice commands.
+## 📱 Features
 
-Each result displays:
-- Name
-- Village
-- Amount (₹)
+- 🔍 Live search with highlighting
+- 🎤 Voice search (Hindi)
+- 🌙 Dark luxury theme
+- 📱 Mobile-first design
+- 💾 Offline support (PWA)
+- 🔒 Admin panel with authentication
 
-## 🎯 Purpose
+## 🏗️ Tech Stack
 
-This project aims to bridge the gap between traditional record-keeping and modern digital access. It is especially useful for people who maintain records in notebooks and need a faster way to retrieve information.
+- Vanilla HTML/CSS/JS
+- Supabase (optional)
+- Service Worker for offline
 
-## 🛠️ Tech Stack
+## 📁 Structure
 
-- HTML  
-- CSS  
-- JavaScript (Vanilla)  
-- Web Speech API (for voice search)
+```
+├── index.html      # Main app
+├── app.js         # Application logic
+├── styles.css     # Premium UI styles
+├── sw.js         # Service worker
+├── package.json  # Dependencies
+├── public/
+│   └── entries.json  # Local data
+└── supabase-config.js  # Database config
+```
 
-## 📦 Setup
+## 🔐 Security
 
-1. Clone the repository  
-2. Place your data in `/public/entries.json`  
-3. Run the project locally  
+- XSS protection via input sanitization
+- CSRF tokens for admin actions
+- Secure session storage
+- Input validation
 
-## 💡 Future Improvements
+## 📄 License
 
-- Data editing system  
-- Cloud sync  
-- Multi-language support  
-- Offline install (PWA)
-
----
-
-This project demonstrates how simple technology can solve real everyday problems efficiently.
+MIT

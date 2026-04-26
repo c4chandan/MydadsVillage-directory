@@ -1,7 +1,18 @@
 // ════════════════════════════════════════════════
 // Language System
 // ════════════════════════════════════════════════
+
+// Supabase initialization
+let supabaseClient = null;
+const STORAGE_KEY = 'village_directory_db';
+
 const LANG = {
+let records = [];
+let currentSort = 'newest';
+let browseSortMode = 'newest';
+let currentView = 'home';
+let deferredPrompt;
+const HOME_LIMIT = 8;
     en: {
         title: 'Find Records <span style="color:var(--accent)">Instantly</span>',
         subtitle: "Transform handwritten records into a powerful digital search experience.",
@@ -185,6 +196,34 @@ async function loadRecords() {
     const list = document.getElementById('resultsList');
     list.innerHTML = `<div class="spinner"></div><p style="text-align:center;color:var(--text-dim)">${t('loading')}</p>`;
 
+    // Try Supabase first
+    if (window.supabase && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+        try {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const { data, error } = await supabaseClient
+                .from('records')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (!error && data && data.length > 0) {
+                records = data.map(r => ({
+                    id: r.id,
+                    name: r.name,
+                    village: r.village,
+                    price: r.price,
+                    note: r.note || '',
+                    ts: new Date(r.created_at).getTime()
+                }));
+                saveRecords();
+                renderHome();
+                return;
+            }
+        } catch (e) {
+            console.log('Supabase not available, using local data');
+        }
+    }
+
+    // Fallback to localStorage
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
         try { records = JSON.parse(stored); } catch (e) { records = []; }
@@ -192,6 +231,7 @@ async function loadRecords() {
         return;
     }
 
+    // Fetch from JSON file
     try {
         const res = await fetch('public/entries.json');
         if (!res.ok) throw new Error('Network response was not ok');
@@ -285,15 +325,21 @@ function highlight(text, query) {
     return String(text).replace(regex, '<mark>$1</mark>');
 }
 
+// Escape HTML to prevent XSS
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 
 // ════════════════════════════════════════════════
 // Card HTML
 // ════════════════════════════════════════════════
 function cardHTML(r, query, showAdmin) {
-    const name    = highlight(r.name, query);
-    const village = highlight(r.village, query);
+    const name    = highlight(escapeHtml(r.name), query);
+    const village = highlight(escapeHtml(r.village), query);
     const noteHTML = r.note
-        ? `<div class="card-note">${r.note}</div>`
+        ? `<div class="card-note">${escapeHtml(r.note)}</div>`
         : '';
     const adminHTML = showAdmin ? `
         <div class="admin-actions" style="margin-top:12px; display:flex; gap:8px;">
@@ -614,24 +660,59 @@ document.getElementById('loginModal').addEventListener('click', (e) => {
     if (e.target === document.getElementById('loginModal')) cancelLogin();
 });
 
-document.getElementById('recordForm').onsubmit = (e) => {
+document.getElementById('recordForm').onsubmit = async (e) => {
     e.preventDefault();
     const editId = document.getElementById('editId').value;
     const name   = document.getElementById('fName').value.trim();
     const village= document.getElementById('fVillage').value.trim();
+    const price  = parseInt(document.getElementById('fPrice').value) || 0;
+    const note   = document.getElementById('fNote').value.trim();
 
-    if (!name || !village) return;
+    // Validation
+    if (!name || name.length < 2) {
+        showToast('Name must be at least 2 characters', 'error');
+        return;
+    }
+    if (!village || village.length < 2) {
+        showToast('Village must be at least 2 characters', 'error');
+        return;
+    }
+    if (price < 0 || price > 999999) {
+        showToast('Invalid price amount', 'error');
+        return;
+    }
 
     const entry = {
         id:      editId ? parseInt(editId) : getNextId(),
-        name,
-        village,
-        price:   parseInt(document.getElementById('fPrice').value) || 0,
-        note:    document.getElementById('fNote').value.trim(),
-        ts:      editId
-                    ? (records.find(x => x.id == editId)?.ts || Date.now())
-                    : Date.now()
+        name:    sanitize(name),
+        village: sanitize(village),
+        price:   price,
+        note:    sanitize(note),
+        ts:      editId ? (records.find(x => x.id == editId)?.ts || Date.now()) : Date.now()
     };
+
+    // Save to Supabase if connected
+    if (supabaseClient && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+        try {
+            if (editId) {
+                await supabaseClient.from('records').update({
+                    name: entry.name,
+                    village: entry.village,
+                    price: entry.price,
+                    note: entry.note
+                }).eq('id', entry.id);
+            } else {
+                await supabaseClient.from('records').insert([{
+                    name: entry.name,
+                    village: entry.village,
+                    price: entry.price,
+                    note: entry.note
+                }]);
+            }
+        } catch (e) {
+            console.log('Supabase save failed, using local');
+        }
+    }
 
     if (editId) {
         records = records.map(x => x.id == editId ? entry : x);
@@ -645,6 +726,12 @@ document.getElementById('recordForm').onsubmit = (e) => {
     updateStats();
     showToast(t('saved'));
 };
+
+// Sanitize input to prevent XSS
+function sanitize(str) {
+    if (!str) return '';
+    return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 // ════════════════════════════════════════════════
 // Custom Confirm Dialog

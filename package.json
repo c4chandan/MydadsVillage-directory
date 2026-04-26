@@ -1,0 +1,16 @@
+{
+  "name": "my-dads-notebook",
+  "version": "1.0.0",
+  "description": "Premium village directory search app",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve . -l 3000",
+    "start": "npx serve . -l $PORT"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
