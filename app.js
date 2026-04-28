@@ -67,7 +67,7 @@ var LANG = {
         voiceHint: "Tap to speak"
     },
     hi: {
-        title: '��िकॉर्ड तुरंत <span style="color:var(--accent)">खोजें</span>',
+        title: 'रिकॉर्ड तुरंत <span style="color:var(--accent)">खोजें</span>',
         subtitle: "लिखे हुए रिकॉर्ड को शक्तिशाली डिजिटल सर्च में बदलें।",
         searchPlaceholder: "नाम या गाँव से खोजें...",
         newest: "नया", name: "नाम", price: "कीमत", village: "गाँव",
@@ -304,6 +304,7 @@ function loadRecords(callback) {
             .limit(50)
             .then(function(resp) {
                 if (resp.error || !resp.data || resp.data.length === 0) {
+                    showToast(t('errorLoading'), 'error');
                     loadFromFallback(callback);
                     return;
                 }
@@ -377,6 +378,7 @@ function performSearch(query) {
                 .limit(CONFIG.SEARCH_LIMIT)
                 .then(function(resp) {
                     if (resp.error) {
+                        showToast(t('searchError'), 'error');
                         searchLocalFallback();
                         return;
                     }
@@ -478,6 +480,13 @@ function initVoice() {
         isListening = false;
         voiceBtn.classList.remove('recording');
         if (voiceStatus) voiceStatus.textContent = '';
+    };
+    
+    recognition.onerror = function(e) {
+        isListening = false;
+        voiceBtn.classList.remove('recording');
+        if (voiceStatus) voiceStatus.textContent = '';
+        console.log('Voice error:', e.error);
     };
     
     recognition.onresult = function(e) {
