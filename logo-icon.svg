@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background circle -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a"/>
+      <stop offset="100%" style="stop-color:#0f0f0f"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff9d4d"/>
+      <stop offset="100%" style="stop-color:#ff7a00"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="url(#bgGrad)"/>
+  
+  <!-- Document shape -->
+  <rect x="145" y="120" width="222" height="280" rx="24" fill="none" stroke="#2a2a2a" stroke-width="16"/>
+  
+  <!-- Document lines -->
+  <line x1="185" y1="180" x2="327" y2="180" stroke="#3a3a3a" stroke-width="14" stroke-linecap="round"/>
+  <line x1="185" y1="230" x2="300" y2="230" stroke="#3a3a3a" stroke-width="14" stroke-linecap="round"/>
+  <line x1="185" y1="280" x2="270" y2="280" stroke="#3a3a3a" stroke-width="14" stroke-linecap="round"/>
+  
+  <!-- Magnifying glass -->
+  <circle cx="340" cy="340" r="90" fill="none" stroke="url(#accentGrad)" stroke-width="28" filter="url(#glow)"/>
+  
+  <!-- Glass handle -->
+  <line x1="405" y1="405" x2="450" y2="450" stroke="url(#accentGrad)" stroke-width="32" stroke-linecap="round" filter="url(#glow)"/>
+  
+  <!-- Subtle data dots in glass -->
+  <circle cx="325" cy="325" r="6" fill="#ff9d4d" opacity="0.6"/>
+  <circle cx="355" cy="340" r="4" fill="#ff9d4d" opacity="0.4"/>
+  <circle cx="340" cy="360" r="5" fill="#ff9d4d" opacity="0.5"/>
+</svg>

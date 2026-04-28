@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <defs>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff9d4d"/>
+      <stop offset="100%" style="stop-color:#ff7a00"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Icon -->
+  <g transform="translate(20, 10)">
+    <!-- Document -->
+    <rect x="0" y="0" width="70" height="90" rx="12" fill="none" stroke="#2a2a2a" stroke-width="6"/>
+    <line x1="15" y1="25" x2="55" y2="25" stroke="#3a3a3a" stroke-width="5" stroke-linecap="round"/>
+    <line x1="15" y1="42" x2="48" y2="42" stroke="#3a3a3a" stroke-width="5" stroke-linecap="round"/>
+    <line x1="15" y1="59" x2="40" y2="59" stroke="#3a3a3a" stroke-width="5" stroke-linecap="round"/>
+    
+    <!-- Magnifying glass -->
+    <circle cx="75" cy="75" r="28" fill="none" stroke="url(#accentGrad)" stroke-width="10" filter="url(#glow)"/>
+    <line x1="95" y1="95" x2="108" y2="108" stroke="url(#accentGrad)" stroke-width="12" stroke-linecap="round" filter="url(#glow)"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="120" y="75" font-family="'Inter', 'Noto Sans Devanagari', system-ui, sans-serif" font-size="38" font-weight="700" fill="#ffffff" letter-spacing="-1">
+    Village<tspan fill="#ff7a00">Dir</tspan>
+  </text>
+</svg>
