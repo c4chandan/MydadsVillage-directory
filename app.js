@@ -1,15 +1,31 @@
-// Village Directory - Production Grade
-var STORAGE_KEY = 'village_directory_db';
-var CACHE_KEY = 'village_cache';
+// Village Directory - Production Grade Final
+// ════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════
+var CONFIG = {
+    STORAGE_KEY: 'village_directory_db',
+    CACHE_KEY: 'village_cache',
+    SEARCH_CACHE_KEY: 'search_cache',
+    ANALYTICS_KEY: 'village_analytics',
+    HOME_LIMIT: 8,
+    SEARCH_LIMIT: 30,
+    DEBOUNCE_MS: 300,
+    MAX_SEARCH_LENGTH: 50,
+    MIN_SEARCH_LENGTH: 1
+};
+
 var records = [];
 var currentSort = 'newest';
 var browseSortMode = 'newest';
 var currentView = 'home';
-var HOME_LIMIT = 8;
 var isOnline = navigator.onLine;
 var supabaseClient = null;
+var currentQuery = '';
+var iconsRendered = false;
 
-// Language strings
+// ════════════════════════════════════════════════
+// LANGUAGE
+// ════════════════════════════════════════════════
 var LANG = {
     en: {
         title: 'Find Records <span style="color:var(--accent)">Instantly</span>',
@@ -32,25 +48,29 @@ var LANG = {
         enterPin: "Admin Login", pinSubtext: "Secure access for management",
         login: "Sign In", back: "Cancel", wrongPin: "Invalid User ID or Password!",
         totalRecords: "Total Records", totalAmount: "Total Amount", villages: "Villages",
-        install: "Install Directory App", installText: "Fast, offline and ready on your home screen",
-        adminSearch: "Search records...", langBtn: "Hindi",
+        install: "Install App", installText: "Add to home screen for offline access",
+        adminSearch: "Search records...", langBtn: "हिंदी",
         loading: "Loading...", resultsFound: "results found",
         recentEntries: "Recent Entries",
         viewAllRecords: "View All Records",
         browseAll: "All Entries",
         passwordLabel: "Password",
         errorLoading: "Unable to load records",
-        networkError: "Network error",
-        offline: "Offline Mode - Showing cached data",
-        searchError: "Search failed. Try again.",
+        networkError: "Network error. Please check connection.",
+        offline: "Offline Mode",
+        searchError: "Something went wrong. Please try again.",
         authRequired: "Please login to manage records",
-        logout: "Logout"
+        logout: "Logout",
+        tryTyping: "Try typing a name or village",
+        speaking: "Listening...",
+        processing: "Processing...",
+        voiceHint: "Tap to speak"
     },
     hi: {
-        title: 'रिकॉर्ड तुरंत <span style="color:var(--accent)">खोजें</span>',
-        subtitle: "लिखे हुए रिकॉर्ड को एक शक्तिशाली डिजिटल सर्च अनुभव में बदलें।",
+        title: '��िकॉर्ड तुरंत <span style="color:var(--accent)">खोजें</span>',
+        subtitle: "लिखे हुए रिकॉर्ड को शक्तिशाली डिजिटल सर्च में बदलें।",
         searchPlaceholder: "नाम या गाँव से खोजें...",
-        newest: "ना", name: "नाम", price: "कीमत", village: "गाँव",
+        newest: "नया", name: "नाम", price: "कीमत", village: "गाँव",
         home: "होम", admin: "एडमिन", explore: "एक्सप्लोर",
         manage: "रिकॉर्ड प्रबंधन", backup: "बैकअप", load: "लोड",
         addNew: "नया रिकॉर्ड", editRecord: "एडिट करें",
@@ -59,15 +79,15 @@ var LANG = {
         villagePlaceholder: "जैसे: भटनी",
         pricePlaceholder: "जैसे: 101",
         notePlaceholder: "वैकल्पिक नोट...",
-        save: "रिकॉर्ड सेव करें", edit: "एडिट", delete: "हटाएं",
+        save: "सेव करें", edit: "एडिट", delete: "हटाएं",
         noRecords: "कोई रिकॉर्ड नहीं मिला", noData: "अभी कोई डेटा नहीं है",
         confirmDelete: "क्या आप इस रिकॉर्ड को हटाना चाहते हैं?",
         saved: "रिकॉर्ड सफलतापूर्वक सेव हो गया!", deleted: "रिकॉर्ड हटा दिया गया!",
-        imported: "डेटा सफलतापूर्वक इम्पोर्ट हो गया!", invalidFile: "गलत फ़ाइल फॉर्मेट!",
-        enterPin: "एडमिन लॉगिन", pinSubtext: "मैनेजमेंट के लिए सुरक्षित लॉगिन",
-        login: "लॉगिन करें", back: "रद्द करें", wrongPin: "गलत आईडी या पासवर्ड!",
+        imported: "डेटा सफलतापूर्वक इम्पोर्ट हो गया!", invalidFile: "गलत फ़ाइल!",
+        enterPin: "एडमिन लॉगिन", pinSubtext: "प्रबंधन के लिए सुरक्षित",
+        login: "लॉगिन", back: "रद्द", wrongPin: "गलत आईडी या पासवर्ड!",
         totalRecords: "कुल रिकॉर्ड", totalAmount: "कुल राशि", villages: "गाँव",
-        install: "ऐप इंस्टॉल करें", installText: "तेज़, ऑफलाइन और होम स्क्रीन पर तैयार",
+        install: "ऐप इंस्टॉल करें", installText: "ऑफलाइन के लिए होम स्क्रीन में जोड़ें",
         adminSearch: "रिकॉर्ड खोजें...", langBtn: "English",
         loading: "लोड हो रहा है...", resultsFound: "रिकॉर्ड मिले",
         recentEntries: "हाल के रिकॉर्ड",
@@ -75,11 +95,15 @@ var LANG = {
         browseAll: "सभी रिकॉर्ड",
         passwordLabel: "पासवर्ड",
         errorLoading: "रिकॉर्ड लोड नहीं हो सके",
-        networkError: "नेटवर्क त्रुटि",
-        offline: "ऑफलाइन मोड - कैश्ड डेटा दिखा रहे हैं",
-        searchError: "खोज विफल। पुनः प्रयास करें।",
-        authRequired: "रिकॉर्ड प्रबंधन के लिए कृपया लॉगिन करें",
-        logout: "लॉग आउट"
+        networkError: "नेटवर्क त्रुटि। कनेक्शन जांचें।",
+        offline: "ऑफलाइन मोड",
+        searchError: "कुछ गलत हो गया। पुनः प्रयास करें।",
+        authRequired: "प्रबंधन के लिए लॉगिन करें",
+        logout: "लॉग आउट",
+        tryTyping: "नाम या गाँव typing करें",
+        speaking: "सुन रहे हैं...",
+        processing: "प्रोसेसिंग...",
+        voiceHint: "बोलने के लिए टैप करें"
     }
 };
 
@@ -90,11 +114,123 @@ function toggleLang() {
     currentLang = currentLang === 'hi' ? 'en' : 'hi';
     localStorage.setItem('app_lang', currentLang);
     applyLang();
-    if (currentView === 'home') renderHome();
-    else if (currentView === 'admin') renderAdmin();
-    else renderBrowse();
+    renderCurrentView();
 }
 
+// ════════════════════════════════════════════════
+// UTILITIES - SECURITY & DATA RELIABILITY
+// ════════════════════════════════════════════════
+function sanitizeInput(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str.trim().slice(0, 500).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function sanitizeSearch(str) {
+    if (!str || typeof str !== 'string') return '';
+    var s = str.trim().toLowerCase().slice(0, CONFIG.MAX_SEARCH_LENGTH);
+    s = s.replace(/\s+/g, ' ');
+    return s;
+}
+
+function validateSearch(query) {
+    if (!query || query.length < CONFIG.MIN_SEARCH_LENGTH) return { valid: false };
+    if (query.length > CONFIG.MAX_SEARCH_LENGTH) return { valid: false, error: 'Query too long' };
+    return { valid: true };
+}
+
+function safeDisplay(str, fallback) {
+    fallback = fallback || 'Unknown';
+    if (!str || typeof str !== 'string') return fallback;
+    var s = str.trim();
+    return s.length > 0 ? escapeHtml(s) : fallback;
+}
+
+function safePrice(price, fallback) {
+    fallback = fallback || 'N/A';
+    if (price === null || price === undefined) return fallback;
+    var n = Number(price);
+    if (isNaN(n) || n < 0) return fallback;
+    return '₹' + n.toLocaleString('en-IN');
+}
+
+function escapeHtml(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ════════════════════════════════════════════════
+// AI SMART SEARCH - FUZZY MATCHING
+// ════════════════════════════════════════════════
+function levenshteinDistance(a, b) {
+    if (!a || !b) return a ? a.length : (b ? b.length : 0);
+    a = a.toLowerCase();
+    b = b.toLowerCase();
+    var matrix = [];
+    for (var i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (var j = 0; j <= a.length; j++) matrix[0][j] = j;
+    for (var i = 1; i <= b.length; i++) {
+        for (var j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
+    return matrix[b.length][a.length];
+}
+
+function fuzzyMatch(text, query) {
+    if (!text || !query) return 0;
+    text = text.toLowerCase();
+    query = query.toLowerCase();
+    
+    if (text === query) return 100;
+    if (text.startsWith(query)) return 90;
+    if (text.indexOf(query) !== -1) return 80;
+    
+    var distance = levenshteinDistance(text, query);
+    var maxLen = Math.max(text.length, query.length);
+    var similarity = ((maxLen - distance) / maxLen) * 70;
+    
+    return similarity >= 30 ? similarity : 0;
+}
+
+function smartSearch(records, query) {
+    if (!records || !records.length || !query) return records;
+    
+    var scored = records.map(function(r) {
+        var nameScore = fuzzyMatch(r.name || '', query);
+        var villageScore = fuzzyMatch(r.village || '', query) * 0.8;
+        var maxScore = Math.max(nameScore, villageScore);
+        return { record: r, score: maxScore };
+    });
+    
+    scored = scored.filter(function(s) { return s.score > 0; });
+    scored.sort(function(a, b) {
+        if (b.score !== a.score) return b.score - a.score;
+        return (b.ts || 0) - (a.ts || 0);
+    });
+    
+    return scored.slice(0, CONFIG.SEARCH_LIMIT).map(function(s) { return s.record; });
+}
+
+// ════════════════════════════════════════════════
+// HIGHLIGHT
+// ════════════════════════════════════════════════
+function highlight(text, query) {
+    if (!query || !text) return text;
+    var escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return String(text).replace(new RegExp('(' + escaped + ')', 'gi'), '<mark>$1</mark>');
+}
+
+// ════════════════════════════════════════════════
+// LANGUAGE UI
+// ════════════════════════════════════════════════
 function applyLang() {
     var map = {
         appTitle: 'title', appSubtitle: 'subtitle', langBtnText: 'langBtn',
@@ -108,20 +244,9 @@ function applyLang() {
         if (el) el.textContent = t(map[id]);
     }
     var homeSectionTitle = document.getElementById('homeSectionTitle');
-    if (homeSectionTitle) {
-        homeSectionTitle.innerHTML = '<i data-lucide="clock"></i> ' + t('recentEntries');
-        lucide.createIcons();
-    }
+    if (homeSectionTitle) homeSectionTitle.innerHTML = '<i data-lucide="clock"></i> ' + t('recentEntries');
     var ms = document.getElementById('mainSearch');
     if (ms) ms.placeholder = t('searchPlaceholder');
-    var lt = document.getElementById('loginTitle');
-    var ls = document.getElementById('loginSubtext');
-    var lb = document.getElementById('loginBtn');
-    var lbb = document.getElementById('loginBackBtn');
-    if (lt) lt.textContent = t('enterPin');
-    if (ls) ls.textContent = t('pinSubtext');
-    if (lb) lb.textContent = t('login');
-    if (lbb) lbb.textContent = t('back');
     var at = document.getElementById('appTitle');
     var as = document.getElementById('appSubtitle');
     if (at) at.innerHTML = t('title');
@@ -132,54 +257,27 @@ function applyLang() {
     if (it) it.textContent = t('install');
     if (is) is.textContent = t('installText');
     if (il) il.textContent = t('install');
+    var lt = document.getElementById('loginTitle');
+    var ls = document.getElementById('loginSubtext');
+    var lb = document.getElementById('loginBtn');
+    var lbb = document.getElementById('loginBackBtn');
+    if (lt) lt.textContent = t('enterPin');
+    if (ls) ls.textContent = t('pinSubtext');
+    if (lb) lb.textContent = t('login');
+    if (lbb) lbb.textContent = t('back');
+    lucide.createIcons();
 }
 
-// Security functions
-function sanitizeInput(str) {
-    if (!str || typeof str !== 'string') return '';
-    return str.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;').slice(0, 500);
+function renderCurrentView() {
+    if (currentView === 'home') renderHome();
+    else if (currentView === 'admin') renderAdmin();
+    else if (currentView === 'browse') renderBrowse();
+    else if (currentView === 'analytics') renderAnalytics();
 }
 
-function sanitizeForSearch(str) {
-    if (!str || typeof str !== 'string') return '';
-    return str.trim().toLowerCase().slice(0, 100);
-}
-
-function validateRecord(name, village, price) {
-    if (!name || name.length < 2) return { valid: false, error: 'Name must be at least 2 characters' };
-    if (!village || village.length < 2) return { valid: false, error: 'Village must be at least 2 characters' };
-    if (typeof price !== 'number' || price < 0 || price > 999999) return { valid: false, error: 'Invalid price amount' };
-    return { valid: true };
-}
-
-function safeDisplay(str, fallback) {
-    fallback = fallback || 'Unknown';
-    if (!str || typeof str !== 'string') return fallback;
-    var trimmed = str.trim();
-    return trimmed.length > 0 ? escapeHtml(trimmed) : fallback;
-}
-
-function safePriceDisplay(price, fallback) {
-    fallback = fallback || 'N/A';
-    if (price === null || price === undefined || isNaN(price)) return fallback;
-    var num = Number(price);
-    if (isNaN(num) || num < 0) return fallback;
-    return '₹' + num.toLocaleString('en-IN');
-}
-
-function escapeHtml(str) {
-    if (!str || typeof str !== 'string') return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function highlight(text, query) {
-    if (!query || !text) return text;
-    var escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    var regex = new RegExp('(' + escaped + ')', 'gi');
-    return String(text).replace(regex, '<mark>$1</mark>');
-}
-
-// Supabase client
+// ════════════════════════════════════════════════
+// SUPABASE
+// ════════════════════════════════════════════════
 function getSupabaseClient() {
     if (supabaseClient) return supabaseClient;
     if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
@@ -188,260 +286,139 @@ function getSupabaseClient() {
     return supabaseClient;
 }
 
-// Check if user is authenticated
 function isAuthenticated() {
-    var session = sessionStorage.getItem('supabase_session');
-    return session ? true : false;
+    return !!sessionStorage.getItem('supabase_session');
 }
 
-function getSession() {
-    var session = sessionStorage.getItem('supabase_session');
-    return session ? JSON.parse(session) : null;
-}
-
-// Load records from Supabase
+// ════════════════════════════════════════════════
+// DATA LOADING
+// ════════════════════════════════════════════════
 function loadRecords(callback) {
     var list = document.getElementById('resultsList');
-    if (list) {
-        list.innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--text-dim)">' + t('loading') + '</p>';
-    }
+    if (list) list.innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--text-dim)">' + t('loading') + '</p>';
     
     var client = getSupabaseClient();
-    console.log('Supabase client:', !!client, 'URL:', window.SUPABASE_URL);
-    
     if (client) {
-        client.from('records').select('id, name, village, price, note, created_at').order('created_at', { ascending: false }).limit(100).then(function(response) {
-            console.log('Supabase response:', response);
-            if (response.error) {
-                console.log('Load error:', response.error.message);
-                loadFromCacheOrFallback(callback);
-                return;
-            }
-            if (response.data && response.data.length > 0) {
-                records = response.data.slice(0, 100).map(function(r) {
+        client.from('records').select('id, name, village, price, note, created_at')
+            .order('created_at', { ascending: false })
+            .limit(50)
+            .then(function(resp) {
+                if (resp.error || !resp.data || resp.data.length === 0) {
+                    loadFromFallback(callback);
+                    return;
+                }
+                records = resp.data.map(function(r) {
                     return {
                         id: r.id,
-                        name: safeDisplay(r.name, 'Unknown'),
-                        village: safeDisplay(r.village, 'Unknown'),
+                        name: safeDisplay(r.name),
+                        village: safeDisplay(r.village),
                         price: Number(r.price) || 0,
                         note: safeDisplay(r.note, ''),
                         ts: r.created_at ? new Date(r.created_at).getTime() : Date.now()
                     };
                 });
-                saveCache();
-                console.log('Loaded from Supabase:', records.length);
-                if (callback) callback();
-                else renderHome();
+                saveToCache();
+                renderHome();
                 updateStats();
-                return;
-            }
-            console.log('No data in Supabase');
-            loadFromCacheOrFallback(callback);
-        }).catch(function(e) {
-            console.log('Exception:', e);
-            loadFromCacheOrFallback(callback);
-        });
+            })
+            .catch(function() { loadFromFallback(callback); });
     } else {
-        console.log('No Supabase client');
-        loadFromCacheOrFallback(callback);
+        loadFromFallback(callback);
     }
 }
 
-function loadFromCacheOrFallback(callback) {
-    // Try cache first
-    var cached = localStorage.getItem(CACHE_KEY);
+function loadFromFallback(callback) {
+    var cached = localStorage.getItem(CONFIG.CACHE_KEY);
     if (cached) {
-        try {
-            records = JSON.parse(cached);
-            console.log('Loaded from cache:', records.length);
-            if (callback) callback();
-            else renderHome();
-            updateStats();
-            return;
-        } catch (e) {
-            console.log('Cache parse error:', e);
-        }
+        try { records = JSON.parse(cached); } catch (e) { records = []; }
     }
-    
-    // Try JSON file
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'public/entries.json', true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            try {
-                var data = JSON.parse(xhr.responseText);
-                if (Array.isArray(data)) {
-                    records = data.slice(0, 100).map(function(r, i) {
-                        return {
-                            id: r.id || i + 1,
-                            name: safeDisplay(r.name, 'Unknown'),
-                            village: safeDisplay(r.village, 'Unknown'),
-                            price: Number(r.price) || 0,
-                            note: safeDisplay(r.note, ''),
-                            ts: Date.now() - i * 1000
-                        };
-                    });
-                    saveCache();
-                    console.log('Loaded from JSON:', records.length);
-                }
-            } catch(e) {
-                console.log('JSON parse error:', e);
-            }
-        }
-        if (callback) callback();
-        else renderHome();
-        updateStats();
-    };
-    xhr.onerror = function() {
-        console.log('JSON load failed');
-        if (callback) callback();
-        else renderHome();
-        updateStats();
-    };
-    xhr.send();
+    if (callback) callback();
+    else renderHome();
+    updateStats();
 }
 
-function saveCache() {
+function saveToCache() {
     try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify(records));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify(records));
     } catch (e) {}
-}
-
-// Database-level search (Supabase)
-function searchRecordsDB(query, callback) {
-    var list = document.getElementById('resultsList');
-    if (!list) return;
-    
-    list.innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--text-dim)">' + t('loading') + '</p>';
-    
-    var client = getSupabaseClient();
-    if (client && query) {
-        client.from('records').select('id, name, village, price, note, created_at')
-            .or('name.ilike.%' + query + '%,village.ilike.%' + query + '%')
-            .order('created_at', { ascending: false })
-            .limit(20)
-            .then(function(response) {
-                if (response.error) {
-                    list.innerHTML = '<div class="empty-state"><i data-lucide="alert-circle"></i><p>' + t('searchError') + '</p></div>';
-                    lucide.createIcons();
-                    return;
-                }
-                if (response.data && response.data.length > 0) {
-                    var items = response.data.map(function(r) {
-                        return {
-                            id: r.id,
-                            name: safeDisplay(r.name, 'Unknown'),
-                            village: safeDisplay(r.village, 'Unknown'),
-                            price: Number(r.price) || 0,
-                            note: safeDisplay(r.note, ''),
-                            ts: r.created_at ? new Date(r.created_at).getTime() : Date.now()
-                        };
-                    });
-                    renderSearchResults(items, query);
-                } else {
-                    list.innerHTML = '<div class="empty-state"><i data-lucide="search-x"></i><p>' + t('noRecords') + '</p></div>';
-                    lucide.createIcons();
-                }
-                if (callback) callback();
-            });
-    } else {
-        if (callback) callback();
-        else renderHome();
-    }
-}
-
-function renderSearchResults(items, query) {
-    var list = document.getElementById('resultsList');
-    var countEl = document.getElementById('resultCount');
-    var viewAllBox = document.getElementById('viewAllContainer');
-    var homeTitle = document.getElementById('homeSectionTitle');
-    
-    if (!list) return;
-    
-    countEl.textContent = items.length + ' ' + t('resultsFound');
-    viewAllBox.classList.add('hidden');
-    homeTitle.innerHTML = '<i data-lucide="search"></i> ' + t('resultsFound');
-    
-    if (!items.length) {
-        list.innerHTML = '<div class="empty-state"><i data-lucide="search-x"></i><p>' + t('noRecords') + '</p></div>';
-        lucide.createIcons();
-        return;
-    }
-    
-    list.innerHTML = items.map(function(r) { return cardHTML(r, query, false); }).join('');
-    lucide.createIcons();
 }
 
 function updateStats() {
     var total = records.length;
     var sRecVal = document.getElementById('statRecordsVal');
     var sSource = document.getElementById('statSource');
-    if (sRecVal) sRecVal.textContent = total > 0 ? total : '-';
+    if (sRecVal) sRecVal.textContent = total || '-';
     if (sSource) sSource.textContent = isOnline ? 'Cloud' : 'Offline';
 }
 
-function sortData(data, mode) {
-    if (!Array.isArray(data) || data.length === 0) return [];
-    var d = data.slice();
-    switch (mode || currentSort) {
-        case 'name': return d.sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); });
-        case 'price': return d.sort(function(a, b) { return (b.price || 0) - (a.price || 0); });
-        case 'village': return d.sort(function(a, b) { return (a.village || '').localeCompare(b.village || ''); });
-        default: return d.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
-    }
-}
+// ════════════════════════════════════════════════
+// SEARCH - DEBOUNCED
+// ════════════════════════════════════════════════
+var searchTimeout = null;
 
-function setSort(type, el) {
-    currentSort = type;
-    var chips = document.querySelectorAll('#homeChips .chip');
-    for (var i = 0; i < chips.length; i++) chips[i].classList.remove('active');
-    el.classList.add('active');
-    var q = sanitizeForSearch(document.getElementById('mainSearch').value);
-    if (q) {
-        var filtered = records.filter(function(r) {
-            return (r.name || '').toLowerCase().indexOf(q) !== -1 || (r.village || '').toLowerCase().indexOf(q) !== -1;
-        });
-        renderHome(filtered);
-    } else {
+function performSearch(query) {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    
+    var validation = validateSearch(query);
+    if (!validation.valid) {
         renderHome();
+        return;
     }
+    
+    currentQuery = sanitizeSearch(query);
+    syncUrl();
+    
+    searchTimeout = setTimeout(function() {
+        var client = getSupabaseClient();
+        if (client && isOnline) {
+            client.from('records').select('id, name, village, price, note, created_at')
+                .or('name.ilike.%' + currentQuery + '%,village.ilike.%' + currentQuery + '%')
+                .order('created_at', { ascending: false })
+                .limit(CONFIG.SEARCH_LIMIT)
+                .then(function(resp) {
+                    if (resp.error) {
+                        searchLocalFallback();
+                        return;
+                    }
+                    var results = (resp.data || []).map(function(r) {
+                        return {
+                            id: r.id,
+                            name: safeDisplay(r.name),
+                            village: safeDisplay(r.village),
+                            price: Number(r.price) || 0,
+                            note: safeDisplay(r.note, ''),
+                            ts: r.created_at ? new Date(r.created_at).getTime() : Date.now()
+                        };
+                    });
+                    renderSearchResults(results);
+                    trackSearch(currentQuery, results.length);
+                })
+                .catch(function() { searchLocalFallback(); });
+        } else {
+            searchLocalFallback();
+        }
+    }, CONFIG.DEBOUNCE_MS);
 }
 
-function setBrowseSort(type, el) {
-    browseSortMode = type;
-    var chips = document.querySelectorAll('#browseChips .chip');
-    for (var i = 0; i < chips.length; i++) chips[i].classList.remove('active');
-    el.classList.add('active');
-    renderBrowse();
+function searchLocalFallback() {
+    var results = smartSearch(records, currentQuery);
+    renderSearchResults(results);
 }
 
-function cardHTML(r, query, showAdmin) {
-    var safeName = escapeHtml(r.name) || 'Unknown';
-    var safeVillage = escapeHtml(r.village) || 'Unknown';
-    var name = highlight(safeName, query);
-    var village = highlight(safeVillage, query);
-    var noteHTML = r.note ? '<div class="card-note">' + escapeHtml(r.note) + '</div>' : '';
-    var adminHTML = showAdmin ? '<div class="admin-actions" style="margin-top:12px;display:flex;gap:8px;"><button class="btn-sm btn-edit" onclick="editRecord(' + r.id + ')" style="background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.15);padding:6px 12px;border-radius:var(--radius-md);font-size:0.75rem;font-weight:700;cursor:pointer;">' + t('edit') + '</button><button class="btn-sm btn-del" onclick="deleteRecord(' + r.id + ')" style="background:rgba(255,255,255,0.05);color:var(--danger);border:1px solid rgba(255,255,255,0.1);padding:6px 12px;border-radius:var(--radius-md);font-size:0.75rem;font-weight:700;cursor:pointer;">' + t('delete') + '</button></div>' : '';
-    return '<div class="card"><div class="card-info"><div class="card-name">' + name + '</div><div class="card-village"><i data-lucide="map-pin"></i>' + village + '</div>' + noteHTML + adminHTML + '</div><div class="card-price">' + safePriceDisplay(r.price) + '</div></div>';
-}
-
-var currentQuery = '';
-var iconsRendered = false;
-
-function renderHome(data) {
+function renderSearchResults(items) {
     var list = document.getElementById('resultsList');
     var countEl = document.getElementById('resultCount');
     var viewAllBox = document.getElementById('viewAllContainer');
     var homeTitle = document.getElementById('homeSectionTitle');
+    
     if (!list) return;
     
-    var items = sortData(data !== undefined ? data : records, currentSort);
-    var totalMatching = items.length;
+    var total = items.length;
+    countEl.textContent = currentQuery ? total + ' ' + t('resultsFound') : '';
     
     if (!currentQuery) {
-        items = items.slice(0, HOME_LIMIT);
-        viewAllBox.classList.toggle('hidden', totalMatching <= HOME_LIMIT);
+        items = sortData(items).slice(0, CONFIG.HOME_LIMIT);
+        viewAllBox.classList.toggle('hidden', total <= CONFIG.HOME_LIMIT);
         homeTitle.innerHTML = '<i data-lucide="clock"></i> ' + t('recentEntries');
     } else {
         viewAllBox.classList.add('hidden');
@@ -451,25 +428,117 @@ function renderHome(data) {
     if (!items.length) {
         var msg = currentQuery ? t('noRecords') : t('noData');
         list.innerHTML = '<div class="empty-state"><i data-lucide="search-x"></i><p>' + msg + '</p></div>';
-        countEl.textContent = '';
+        if (currentQuery) list.innerHTML += '<p style="color:var(--text-dim);margin-top:8px;">' + t('tryTyping') + '</p>';
         lucide.createIcons();
         return;
     }
     
-    countEl.textContent = currentQuery ? totalMatching + ' ' + t('resultsFound') : '';
-    list.innerHTML = items.map(function(r) { return cardHTML(r, currentQuery, false); }).join('');
-    if (!iconsRendered) {
-        lucide.createIcons();
-        iconsRendered = true;
+    list.innerHTML = items.map(function(r) { return cardHTML(r, currentQuery, currentView === 'admin'); }).join('');
+    if (!iconsRendered) { lucide.createIcons(); iconsRendered = true; }
+}
+
+function sortData(data) {
+    if (!data || !data.length) return [];
+    var d = data.slice();
+    switch (currentSort) {
+        case 'name': return d.sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); });
+        case 'price': return d.sort(function(a, b) { return (b.price || 0) - (a.price || 0); });
+        case 'village': return d.sort(function(a, b) { return (a.village || '').localeCompare(b.village || ''); });
+        default: return d.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
     }
+}
+
+// ════════════════════════════════════════════════
+// VOICE SEARCH
+// ════════════════════════════════════════════════
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var isListening = false;
+
+function initVoice() {
+    if (!SR) {
+        var vb = document.getElementById('voiceBtn');
+        if (vb) vb.style.display = 'none';
+        return;
+    }
+    
+    var recognition = new SR();
+    recognition.lang = currentLang === 'hi' ? 'hi-IN' : 'en-IN';
+    recognition.interimResults = false;
+    
+    var voiceBtn = document.getElementById('voiceBtn');
+    var voiceStatus = document.getElementById('voiceStatus');
+    
+    recognition.onstart = function() {
+        isListening = true;
+        voiceBtn.classList.add('recording');
+        if (voiceStatus) voiceStatus.textContent = t('speaking');
+    };
+    
+    recognition.onend = function() {
+        isListening = false;
+        voiceBtn.classList.remove('recording');
+        if (voiceStatus) voiceStatus.textContent = '';
+    };
+    
+    recognition.onresult = function(e) {
+        var transcript = e.results[0][0].transcript;
+        var input = document.getElementById('mainSearch');
+        input.value = transcript;
+        input.dispatchEvent(new Event('input'));
+    };
+    
+    voiceBtn.onclick = function() {
+        if (isListening) recognition.stop();
+        else try { recognition.start(); } catch (e) {}
+    };
+}
+
+window.startVoiceAdd = function() {};
+
+// ════════════════════════════════════════════════
+// VIEWS
+// ════════════════════════════════════════════════
+function switchView(view) {
+    currentView = view;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    document.getElementById('homeView').classList.toggle('hidden', view !== 'home');
+    document.getElementById('adminView').classList.toggle('hidden', view !== 'admin');
+    document.getElementById('browseView').classList.toggle('hidden', view !== 'browse');
+    document.getElementById('analyticsView').classList.toggle('hidden', view !== 'analytics');
+    
+    document.getElementById('navHome').classList.toggle('active', view === 'home');
+    document.getElementById('navBrowse').classList.toggle('active', view === 'browse');
+    document.getElementById('navAnalytics').classList.toggle('active', view === 'analytics');
+    document.getElementById('navAdmin').classList.toggle('active', view === 'admin');
+    
+    document.getElementById('addFab').classList.toggle('show', view === 'admin' && isAuthenticated());
+    
+    renderCurrentView();
+}
+
+function renderHome(data) {
+    var items = data || records;
+    var list = document.getElementById('resultsList');
+    if (!list) return;
+    
+    if (!items.length) {
+        list.innerHTML = '<div class="empty-state"><i data-lucide="book-open"></i><p>' + t('noData') + '</p></div>';
+        lucide.createIcons();
+        return;
+    }
+    
+    items = currentQuery ? items : sortData(items).slice(0, CONFIG.HOME_LIMIT);
+    list.innerHTML = items.map(function(r) { return cardHTML(r, currentQuery, false); }).join('');
+    if (!iconsRendered) { lucide.createIcons(); iconsRendered = true; }
 }
 
 function renderBrowse() {
     var list = document.getElementById('browseList');
     var badge = document.getElementById('browseCountBadge');
-    var items = sortData(records, browseSortMode);
-    if (!list) return;
+    var items = sortData(records);
     if (badge) badge.textContent = items.length;
+    if (!list) return;
     if (!items.length) {
         list.innerHTML = '<div class="empty-state"><i data-lucide="book-open"></i><p>' + t('noData') + '</p></div>';
         lucide.createIcons();
@@ -482,180 +551,75 @@ function renderBrowse() {
 function renderAdmin(data) {
     var list = document.getElementById('adminList');
     var header = document.getElementById('adminHeader');
-    var items = data !== undefined ? data : records;
+    var items = data || records;
     if (!list || !header) return;
     
-    var totalAmount = items.reduce(function(s, r) { return s + (r.price || 0); }, 0);
-    var villageCount = {};
-    items.forEach(function(r) { villageCount[r.village] = true; });
+    var total = items.reduce(function(s, r) { return s + (r.price || 0); }, 0);
+    var villages = items.reduce(function(s, r) { s[r.village] = true; return s; }, {});
     
-    header.innerHTML = '<div class="admin-controls" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;"><h2 style="font-weight:800;font-size:1.4rem;">' + t('manage') + '</h2><div class="admin-btn-group" style="display:flex;gap:8px;"><button class="btn-sm" onclick="exportData()" style="background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.15);padding:10px 16px;border-radius:var(--radius-md);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;"><i data-lucide="download" style="width:16px;height:16px;"></i>' + t('backup') + '</button><button class="btn-sm" onclick="logout()" style="background:rgba(255,68,68,0.2);color:#ef4444;border:1px solid rgba(255,68,68,0.3);padding:10px 16px;border-radius:var(--radius-md);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;"><i data-lucide="log-out" style="width:16px;height:16px;"></i>' + t('logout') + '</button></div></div><div class="stats"><div class="stat-card"><div class="num" id="statRecords">' + items.length + '</div><div class="lbl">' + t('totalRecords') + '</div></div><div class="stat-card"><div class="num">₹' + totalAmount.toLocaleString('en-IN') + '</div><div class="lbl">' + t('totalAmount') + '</div></div><div class="stat-card"><div class="num">' + Object.keys(villageCount).length + '</div><div class="lbl">' + t('villages') + '</div></div></div><div class="search-box" style="margin-bottom:24px;"><i data-lucide="search" style="color:var(--text-dim);width:20px;height:20px;flex-shrink:0"></i><input type="text" id="adminSearch" placeholder="' + t('adminSearch') + '" autocomplete="off" spellcheck="false"></div>';
-    
-    setTimeout(function() {
-        var adminSearchInput = document.getElementById('adminSearch');
-        if (adminSearchInput) {
-            adminSearchInput.addEventListener('input', function(e) { onAdminSearch(e.target.value); });
-        }
-    }, 100);
-    lucide.createIcons();
+    header.innerHTML = '<div class="admin-controls" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;"><h2 style="font-weight:800;font-size:1.4rem;">' + t('manage') + '</h2><button class="btn-clear" onclick="logout()">' + t('logout') + '</button></div><div class="stats"><div class="stat-card"><div class="num">' + items.length + '</div><div class="lbl">' + t('totalRecords') + '</div></div><div class="stat-card"><div class="num">₹' + total.toLocaleString('en-IN') + '</div><div class="lbl">' + t('totalAmount') + '</div></div><div class="stat-card"><div class="num">' + Object.keys(villages).length + '</div><div class="lbl">' + t('villages') + '</div></div></div>';
     
     if (!items.length) {
         list.innerHTML = '<div class="empty-state"><i data-lucide="database"></i><p>' + t('noData') + '</p></div>';
+        lucide.createIcons();
         return;
     }
     list.innerHTML = items.map(function(r) { return cardHTML(r, '', true); }).join('');
-}
-
-function onAdminSearch(q) {
-    q = sanitizeForSearch(q);
-    if (!q) { renderAdmin(); return; }
-    renderAdmin(records.filter(function(r) {
-        return (r.name || '').toLowerCase().indexOf(q) !== -1 || (r.village || '').toLowerCase().indexOf(q) !== -1;
-    }));
-}
-
-// Debounced search
-var searchTimeout = null;
-var DEBOUNCE_MS = 300;
-
-function performDebouncedSearch(query) {
-    if (searchTimeout) clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(function() {
-        var q = sanitizeForSearch(query);
-        currentQuery = q;
-        syncUrl();
-        if (!q) {
-            document.getElementById('suggestions').style.display = 'none';
-            renderHome();
-            return;
-        }
-        // Use database search
-        searchRecordsDB(q);
-    }, DEBOUNCE_MS);
-}
-
-var mainSearchInput = document.getElementById('mainSearch');
-if (mainSearchInput) {
-    mainSearchInput.addEventListener('input', function(e) {
-        performDebouncedSearch(e.target.value);
-    });
-}
-
-function showSuggestions(data, q) {
-    var el = document.getElementById('suggestions');
-    if (!el || !q || !data.length) {
-        if (el) el.style.display = 'none';
-        return;
-    }
-    el.innerHTML = data.slice(0, 6).map(function(r) {
-        return '<div class="sug-item" onclick="pickSuggestion(' + r.id + ')"><div><div class="sug-name">' + highlight(escapeHtml(r.name) || 'Unknown', q) + '</div><div class="sug-village">' + escapeHtml(r.village || 'Unknown') + '</div></div><i data-lucide="arrow-up-left" style="width:16px;color:var(--text-dim)"></i></div>';
-    }).join('');
-    el.style.display = 'block';
-}
-
-window.pickSuggestion = function(id) {
-    var r = records.find(function(x) { return x.id === id; });
-    if (!r) return;
-    document.getElementById('mainSearch').value = r.name;
-    currentQuery = sanitizeForSearch(r.name);
-    document.getElementById('suggestions').style.display = 'none';
-    searchRecordsDB(currentQuery);
-};
-
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.search-area')) {
-        document.getElementById('suggestions').style.display = 'none';
-    }
-});
-
-function switchView(view) {
-    currentView = view;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    document.getElementById('homeView').classList.toggle('hidden', view !== 'home');
-    document.getElementById('adminView').classList.toggle('hidden', view !== 'admin');
-    document.getElementById('browseView').classList.toggle('hidden', view !== 'browse');
-    document.getElementById('analyticsView').classList.toggle('hidden', view !== 'analytics');
-    document.getElementById('navHome').classList.toggle('active', view === 'home');
-    document.getElementById('navAdmin').classList.toggle('active', view === 'admin');
-    document.getElementById('navBrowse').classList.toggle('active', view === 'browse');
-    document.getElementById('navAnalytics').classList.toggle('active', view === 'analytics');
-    document.getElementById('addFab').classList.toggle('show', view === 'admin');
+    lucide.createIcons();
     
-    if (view === 'admin') {
-        if (!isAuthenticated()) {
-            showLogin();
-        } else {
-            renderAdmin();
-        }
-    } else if (view === 'browse') {
-        renderBrowse();
-    } else if (view === 'analytics') {
-        renderAnalytics();
-    } else {
-        renderHome();
-    }
+    if (!isAuthenticated()) showLogin();
 }
 
-// Login (simple session-based for this demo)
+function cardHTML(r, query, showAdmin) {
+    var name = highlight(safeDisplay(r.name), query);
+    var village = highlight(safeDisplay(r.village), query);
+    var note = r.note ? '<div class="card-note">' + safeDisplay(r.note) + '</div>' : '';
+    var adminBtns = showAdmin ? '<div class="admin-actions" style="margin-top:12px;display:flex;gap:8px;"><button class="btn-sm" onclick="editRecord(' + r.id + ')" style="background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.15);padding:6px 12px;border-radius:var(--radius-md);font-size:0.75rem;font-weight:700;cursor:pointer;">' + t('edit') + '</button><button class="btn-sm" onclick="deleteRecord(' + r.id + ')" style="background:rgba(255,68,68,0.2);color:#ef4444;border:1px solid rgba(255,68,68,0.3);padding:6px 12px;border-radius:var(--radius-md);font-size:0.75rem;font-weight:700;cursor:pointer;">' + t('delete') + '</button></div>' : '';
+    
+    return '<div class="card"><div class="card-info"><div class="card-name">' + name + '</div><div class="card-village"><i data-lucide="map-pin"></i>' + village + '</div>' + note + adminBtns + '</div><div class="card-price">' + safePrice(r.price) + '</div></div>';
+}
+
+// ══���═���═══════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════
 function showLogin() {
     applyLang();
     document.getElementById('loginModal').classList.add('open');
-    setTimeout(function() {
-        var field = document.getElementById('adminUser');
-        if (field) field.focus();
-    }, 300);
 }
 
 function login() {
     var user = document.getElementById('adminUser').value.trim();
     var pass = document.getElementById('adminPass').value;
     if (user === 'admin' && pass === 'dad123') {
+        sessionStorage.setItem('supabase_session', JSON.stringify({ user: { id: 'admin' } }));
         sessionStorage.setItem('isAdmin', 'true');
-        sessionStorage.setItem('supabase_session', JSON.stringify({ user: { id: 'admin', email: 'admin@example.com' } }));
         document.getElementById('loginModal').classList.remove('open');
-        document.getElementById('adminUser').value = '';
-        document.getElementById('adminPass').value = '';
         document.getElementById('addFab').classList.add('show');
         renderAdmin();
-        showToast("Logged in as Admin");
+        showToast('Logged in as Admin');
     } else {
         showToast(t('wrongPin'), 'error');
-        document.getElementById('adminPass').value = '';
     }
 }
 
 function logout() {
-    sessionStorage.removeItem('isAdmin');
     sessionStorage.removeItem('supabase_session');
-    showToast("Logged out");
-    switchView('home');
+    sessionStorage.removeItem('isAdmin');
+    showToast('Logged out');
+    showLogin();
 }
 
-var adminPassField = document.getElementById('adminPass');
-if (adminPassField) {
-    adminPassField.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') login();
-    });
-}
-
-function cancelLogin() {
-    document.getElementById('loginModal').classList.remove('open');
-    document.getElementById('adminUser').value = '';
-    document.getElementById('adminPass').value = '';
-    switchView('home');
-}
-
+// ════════════════════════════════════════════════
+// CRUD
+// ════════════════════════════════════════════════
 function openModal(id) {
     document.getElementById('recordModal').classList.add('open');
     document.getElementById('fNameLabel').textContent = t('nameLabel');
     document.getElementById('fVillageLabel').textContent = t('villageLabel');
     document.getElementById('fPriceLabel').textContent = t('priceLabel');
     document.getElementById('fNoteLabel').textContent = t('noteLabel');
-    document.getElementById('fName').placeholder = t('namePlaceholder');
-    document.getElementById('fVillage').placeholder = t('villagePlaceholder');
-    document.getElementById('fPrice').placeholder = t('pricePlaceholder');
-    document.getElementById('fNote').placeholder = t('notePlaceholder');
     document.getElementById('saveBtn').textContent = t('save');
+    
     if (id) {
         var r = records.find(function(x) { return x.id === id; });
         if (!r) return;
@@ -679,127 +643,77 @@ function closeModal() {
 }
 
 document.getElementById('recordModal').addEventListener('click', function(e) {
-    if (e.target === document.getElementById('recordModal')) closeModal();
+    if (e.target.id === 'recordModal') closeModal();
 });
 document.getElementById('loginModal').addEventListener('click', function(e) {
-    if (e.target === document.getElementById('loginModal')) cancelLogin();
+    if (e.target.id === 'loginModal') { document.getElementById('loginModal').classList.remove('open'); switchView('home'); }
 });
 
 document.getElementById('recordForm').onsubmit = function(e) {
     e.preventDefault();
-    if (!isAuthenticated()) {
-        showToast(t('authRequired'), 'error');
-        showLogin();
-        return;
-    }
+    if (!isAuthenticated()) { showToast(t('authRequired'), 'error'); showLogin(); return; }
+    
     var editId = document.getElementById('editId').value;
     var name = sanitizeInput(document.getElementById('fName').value);
     var village = sanitizeInput(document.getElementById('fVillage').value);
     var price = parseInt(document.getElementById('fPrice').value) || 0;
     var note = sanitizeInput(document.getElementById('fNote').value);
-    var validation = validateRecord(name, village, price);
-    if (!validation.valid) {
-        showToast(validation.error, 'error');
+    
+    if (!name || name.length < 2 || !village || village.length < 2) {
+        showToast('Name and village required', 'error');
         return;
     }
+    
     var client = getSupabaseClient();
-    var recordData = { name: name, village: village, price: price, note: note };
+    var data = { name: name, village: village, price: price, note: note };
+    
     if (editId) {
-        client.from('records').update(recordData).eq('id', parseInt(editId)).then(function(resp) {
-            if (!resp.error) {
-                records = records.map(function(x) { return x.id == editId ? Object.assign({}, x, recordData) : x; });
-                saveCache();
-                closeModal();
-                renderAdmin();
-                updateStats();
-                showToast(t('saved'));
-            } else {
-                showToast('Error: ' + resp.error.message, 'error');
-            }
+        client.from('records').update(data).eq('id', parseInt(editId)).then(function() {
+            records = records.map(function(x) { return x.id == editId ? Object.assign({}, x, data) : x; });
+            saveToCache();
+            closeModal();
+            renderAdmin();
+            showToast(t('saved'));
         });
     } else {
-        client.from('records').insert([recordData]).then(function(resp) {
-            if (!resp.error && resp.data) {
-                var newRecord = Object.assign({ id: resp.data[0].id, ts: Date.now() }, recordData);
-                records.unshift(newRecord);
-                saveCache();
-                closeModal();
-                renderAdmin();
-                updateStats();
-                showToast(t('saved'));
-            } else {
-                showToast('Error: ' + (resp.error ? resp.error.message : 'Unknown'), 'error');
+        client.from('records').insert([data]).then(function(resp) {
+            if (resp.data) {
+                records.unshift({ id: resp.data[0].id, ts: Date.now(), price: price, note: note, name: name, village: village });
+                saveToCache();
             }
+            closeModal();
+            renderAdmin();
+            showToast(t('saved'));
         });
     }
 };
 
 window.editRecord = function(id) { openModal(id); };
 window.deleteRecord = function(id) {
-    if (!isAuthenticated()) {
-        showToast(t('authRequired'), 'error');
-        return;
-    }
+    if (!isAuthenticated()) { showToast(t('authRequired'), 'error'); return; }
     document.getElementById('confirmMsg').textContent = t('confirmDelete');
-    document.getElementById('confirmTitle').textContent = 'Delete Record';
-document.getElementById('confirmModal').classList.add('open');
-    window._confirmResolve = function(confirmed) {
+    document.getElementById('confirmModal').classList.add('open');
+    window._confirmAction = function(confirmed) {
         document.getElementById('confirmModal').classList.remove('open');
         if (confirmed) {
             var client = getSupabaseClient();
-            client.from('records').delete().eq('id', id).then(function(resp) {
-                if (!resp.error) {
-                    records = records.filter(function(x) { return x.id !== id; });
-                    saveCache();
-                    renderAdmin();
-                    updateStats();
-                    showToast(t('deleted'));
-                } else {
-                    showToast('Error: ' + resp.error.message, 'error');
-                }
+            client.from('records').delete().eq('id', id).then(function() {
+                records = records.filter(function(x) { return x.id !== id; });
+                saveToCache();
+                renderAdmin();
+                showToast(t('deleted'));
             });
         }
     };
-}
+};
 
 window.resolveConfirm = function(val) {
-    if (window._confirmResolve) {
-        window._confirmResolve(val);
-        window._confirmResolve = null;
-    }
+    if (window._confirmAction) { window._confirmAction(val); window._confirmAction = null; }
 };
 
-// Voice
-var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (SR) {
-    var recognition = new SR();
-    recognition.lang = 'hi-IN';
-    var vb = document.getElementById('voiceBtn');
-    var isListening = false;
-    recognition.onstart = function() { isListening = true; vb.classList.add('recording'); };
-    recognition.onend = function() { isListening = false; vb.classList.remove('recording'); };
-    recognition.onresult = function(e) {
-        var transcript = e.results[0][0].transcript;
-        var input = document.getElementById('mainSearch');
-        input.value = transcript;
-        input.dispatchEvent(new Event('input'));
-    };
-    if (vb) vb.onclick = function() { if (isListening) recognition.stop(); else try { recognition.start(); } catch (e) {}; };
-    window.startVoiceAdd = function() {};
-} else {
-    var vb = document.getElementById('voiceBtn');
-    if (vb) vb.style.display = 'none';
-}
-
-// Export
-window.exportData = function() {
-    var blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'village_directory_' + new Date().toISOString().split('T')[0] + '.json';
-    a.click();
-};
-
+// ════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════
 function showToast(msg, type) {
     var toast = document.getElementById('toast');
     toast.textContent = msg;
@@ -808,7 +722,81 @@ function showToast(msg, type) {
     window._toastTimer = setTimeout(function() { toast.className = 'toast'; }, 2800);
 }
 
+// ════════════════════════════════════════════════════════
+// ANALYTICS
+// ════════════════════════════════════════════════
+var analyticsFilter = 'all';
+
+function trackSearch(query, results) {
+    var analytics = JSON.parse(localStorage.getItem(CONFIG.ANALYTICS_KEY) || '[]');
+    analytics.unshift({ query: query, results: results, timestamp: Date.now() });
+    if (analytics.length > 500) analytics = analytics.slice(0, 500);
+    localStorage.setItem(CONFIG.ANALYTICS_KEY, JSON.stringify(analytics));
+}
+
+function renderAnalytics() {
+    var analytics = JSON.parse(localStorage.getItem(CONFIG.ANALYTICS_KEY) || '[]');
+    var now = Date.now();
+    if (analyticsFilter === 'today') {
+        analytics = analytics.filter(function(a) { return now - a.timestamp < 86400000; });
+    }
+    
+    var total = analytics.length;
+    var unique = {};
+    var totalResults = 0;
+    analytics.forEach(function(a) { unique[a.query] = true; totalResults += a.results || 0; });
+    
+    document.getElementById('totalSearches').textContent = total;
+    document.getElementById('uniqueQueries').textContent = Object.keys(unique).length;
+    document.getElementById('totalResults').textContent = totalResults;
+    
+    var counts = {};
+    analytics.forEach(function(a) { counts[a.query] = (counts[a.query] || 0) + 1; });
+    var top = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; }).slice(0, 5);
+    var max = top.length ? counts[top[0]] : 1;
+    
+    var chart = top.map(function(q) {
+        var pct = Math.round((counts[q] / max) * 100);
+        return '<div class="bar-item"><div class="bar-label">' + q.slice(0, 15) + '</div><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div><div class="bar-value">' + counts[q] + '</div></div>';
+    }).join('') || '<div class="analytics-empty"><p>No data</p></div>';
+    
+    document.getElementById('topNamesChart').innerHTML = chart;
+    document.getElementById('topVillagesChart').innerHTML = top.length ? chart : '<div class="analytics-empty"><p>No data</p></div>';
+    
+    var recent = analytics.slice(0, 10).map(function(a) {
+        var time = Math.floor((now - a.timestamp) / 60000);
+        if (time < 1) time = 'Just now';
+        else if (time < 60) time = time + 'm ago';
+        else if (time < 1440) time = Math.floor(time / 60) + 'h ago';
+        else time = Math.floor(time / 1440) + 'd ago';
+        return '<div class="search-item"><div class="search-query">' + a.query + '</div><div class="search-time">' + time + '</div></div>';
+    }).join('') || '<div class="analytics-empty"><p>No recent</p></div>';
+    
+    document.getElementById('recentSearchesList').innerHTML = recent;
+    lucide.createIcons();
+}
+
+function setAnalyticsFilter(f) {
+    analyticsFilter = f;
+    document.getElementById('filterAll').classList.toggle('active', f === 'all');
+    document.getElementById('filterToday').classList.toggle('active', f === 'today');
+    renderAnalytics();
+}
+
+function clearAnalytics() {
+    document.getElementById('confirmMsg').textContent = 'Clear analytics?';
+    document.getElementById('confirmModal').classList.add('open');
+    window._confirmAction = function(c) {
+        document.getElementById('confirmModal').classList.remove('open');
+        if (c) { localStorage.removeItem(CONFIG.ANALYTICS_KEY); renderAnalytics(); showToast('Cleared'); }
+    };
+}
+
+// ════════════════════════════════════════════════
+// PWA & UTILS
+// ════════════════════════════════════════════════
 var deferredPrompt;
+
 window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     deferredPrompt = e;
@@ -829,56 +817,46 @@ window.installPWA = function() {
 };
 
 function syncUrl() {
-    var q = document.getElementById('mainSearch').value.trim();
     var url = new URL(window.location);
-    if (q) url.searchParams.set('q', q);
+    if (currentQuery) url.searchParams.set('q', currentQuery);
     else url.searchParams.delete('q');
     window.history.replaceState({}, '', url);
 }
 
 window.triggerSearch = function() {
-    if (searchTimeout) clearTimeout(searchTimeout);
-    var q = document.getElementById('mainSearch').value.trim();
-    if (q) {
-        currentQuery = sanitizeForSearch(q);
-        syncUrl();
-        searchRecordsDB(currentQuery);
-    }
+    var q = document.getElementById('mainSearch').value;
+    if (q) performSearch(q);
 };
 
-if (mainSearchInput) {
-    mainSearchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); triggerSearch(); }
-    });
+// EVENTS
+var mainSearch = document.getElementById('mainSearch');
+if (mainSearch) {
+    mainSearch.addEventListener('input', function(e) { performSearch(e.target.value); });
+    mainSearch.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); triggerSearch(); } });
 }
-
-window.addEventListener('popstate', function() {
-    var params = new URLSearchParams(window.location.search);
-    var q = params.get('q');
-    if (q) {
-        document.getElementById('mainSearch').value = q;
-        currentQuery = sanitizeForSearch(q);
-        searchRecordsDB(currentQuery);
-    } else {
-        document.getElementById('mainSearch').value = '';
-        currentQuery = '';
-        renderHome();
-    }
-});
 
 window.addEventListener('online', function() { isOnline = true; updateStats(); });
 window.addEventListener('offline', function() { isOnline = false; updateStats(); showToast(t('offline'), 'warning'); });
 
+var adminPass = document.getElementById('adminPass');
+if (adminPass) adminPass.addEventListener('keydown', function(e) { if (e.key === 'Enter') login(); });
+
+window.addEventListener('popstate', function() {
+    var q = new URLSearchParams(window.location.search).get('q');
+    if (q) { mainSearch.value = q; performSearch(q); }
+    else { mainSearch.value = ''; currentQuery = ''; renderHome(); }
+});
+
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
 function initApp() {
     lucide.createIcons();
     applyLang();
+    initVoice();
     loadRecords();
-    var params = new URLSearchParams(window.location.search);
-    var q = params.get('q');
-    if (q) {
-        document.getElementById('mainSearch').value = q;
-        currentQuery = sanitizeForSearch(q);
-    }
+    var q = new URLSearchParams(window.location.search).get('q');
+    if (q) { mainSearch.value = q; currentQuery = q; }
 }
 
 initApp();
@@ -886,149 +864,3 @@ initApp();
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(function() {});
 }
-
-// ════════════════════════════════════════════════
-// ANALYTICS SYSTEM
-// ════════════════════════════════════════════════
-var ANALYTICS_KEY = 'village_analytics';
-var analyticsFilter = 'all';
-
-function getAnalytics() {
-    var data = localStorage.getItem(ANALYTICS_KEY);
-    return data ? JSON.parse(data) : [];
-}
-
-function saveAnalytics(searchObj) {
-    var analytics = getAnalytics();
-    analytics.unshift({
-        query: searchObj.query,
-        results: searchObj.results,
-        timestamp: Date.now()
-    });
-    // Keep max 500 searches
-    if (analytics.length > 500) analytics = analytics.slice(0, 500);
-    localStorage.setItem(ANALYTICS_KEY, JSON.stringify(analytics));
-}
-
-function trackSearch(query, resultsCount) {
-    var searchObj = {
-        query: query,
-        results: resultsCount,
-        timestamp: Date.now()
-    };
-    saveAnalytics(searchObj);
-}
-
-function getFilteredAnalytics() {
-    var analytics = getAnalytics();
-    var now = Date.now();
-    var dayMs = 24 * 60 * 60 * 1000;
-    
-    if (analyticsFilter === 'today') {
-        return analytics.filter(function(a) { return now - a.timestamp < dayMs; });
-    }
-    return analytics;
-}
-
-function getTopItems(analytics, key, limit) {
-    var counts = {};
-    analytics.forEach(function(a) {
-        var item = a[key] || 'Unknown';
-        if (!counts[item]) counts[item] = { count: 0, resultsSum: 0 };
-        counts[item].count++;
-        counts[item].resultsSum += a.results || 0;
-    });
-    return Object.keys(counts).map(function(name) {
-        return { name: name, count: counts[name].count, resultsSum: counts[name].resultsSum };
-    }).sort(function(a, b) { return b.count - a.count; }).slice(0, limit);
-}
-
-function renderAnalytics() {
-    var analytics = getFilteredAnalytics();
-    var totalSearches = analytics.length;
-    var uniqueQueries = {};
-    var totalResults = 0;
-    analytics.forEach(function(a) {
-        uniqueQueries[a.query] = true;
-        totalResults += a.results || 0;
-    });
-    var uniqueCount = Object.keys(uniqueQueries).length;
-    
-    document.getElementById('totalSearches').textContent = totalSearches;
-    document.getElementById('uniqueQueries').textContent = uniqueCount;
-    document.getElementById('totalResults').textContent = totalResults;
-    
-    // Top Names
-    var topNames = getTopItems(analytics, 'query', 5);
-    var maxCount = topNames.length > 0 ? topNames[0].count : 1;
-    var namesChart = topNames.length > 0 ? topNames.map(function(item) {
-        var percent = Math.round((item.count / maxCount) * 100);
-        return '<div class="bar-item"><div class="bar-label">' + escapeHtml(item.name.slice(0, 15)) + '</div><div class="bar-track"><div class="bar-fill" style="width:' + percent + '%"></div></div><div class="bar-value">' + item.count + '</div></div>';
-    }).join('') : '<div class="analytics-empty"><i data-lucide="search-x"></i><p>No data yet</p></div>';
-    document.getElementById('topNamesChart').innerHTML = namesChart;
-    
-    // Top Villages (using same data for demo - in real app would track separately)
-    var topVillages = getTopItems(analytics, 'query', 5);
-    var maxV = topVillages.length > 0 ? topVillages[0].count : 1;
-    var villagesChart = topVillages.length > 0 ? topVillages.map(function(item) {
-        var percent = Math.round((item.count / maxV) * 100);
-        return '<div class="bar-item"><div class="bar-label">' + escapeHtml(item.name.slice(0, 15)) + '</div><div class="bar-track"><div class="bar-fill" style="width:' + percent + '%"></div></div><div class="bar-value">' + item.count + '</div></div>';
-    }).join('') : '<div class="analytics-empty"><i data-lucide="search-x"></i><p>No data yet</p></div>';
-    document.getElementById('topVillagesChart').innerHTML = villagesChart;
-    
-    // Recent Searches
-    var recent = analytics.slice(0, 10);
-    var recentList = recent.length > 0 ? recent.map(function(a) {
-        var time = formatTimeAgo(a.timestamp);
-        return '<div class="search-item"><div class="search-query">' + escapeHtml(a.query) + '</div><div class="search-time">' + time + '</div></div>';
-    }).join('') : '<div class="analytics-empty"><i data-lucide="search-x"></i><p>No recent searches</p></div>';
-    document.getElementById('recentSearchesList').innerHTML = recentList;
-    
-    lucide.createIcons();
-}
-
-function formatTimeAgo(timestamp) {
-    var seconds = Math.floor((Date.now() - timestamp) / 1000);
-    if (seconds < 60) return 'Just now';
-    if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
-    if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
-    return Math.floor(seconds / 86400) + 'd ago';
-}
-
-function setAnalyticsFilter(filter) {
-    analyticsFilter = filter;
-    document.getElementById('filterAll').classList.toggle('active', filter === 'all');
-    document.getElementById('filterToday').classList.toggle('active', filter === 'today');
-    renderAnalytics();
-}
-
-function clearAnalytics() {
-    document.getElementById('confirmMsg').textContent = 'Clear all analytics data?';
-    document.getElementById('confirmTitle').textContent = 'Clear Analytics';
-    document.getElementById('confirmModal').classList.add('open');
-    window._confirmResolve = function(confirmed) {
-        document.getElementById('confirmModal').classList.remove('open');
-        if (confirmed) {
-            localStorage.removeItem(ANALYTICS_KEY);
-            renderAnalytics();
-            showToast('Analytics cleared');
-        }
-    };
-}
-
-// Modify search to track
-var originalSearchRecordsDB = searchRecordsDB;
-searchRecordsDB = function(query, callback) {
-    originalSearchRecordsDB(query, function() {
-        setTimeout(function() {
-            var resultsEl = document.getElementById('resultCount');
-            var results = 0;
-            if (resultsEl) {
-                var match = resultsEl.textContent.match(/(\d+)/);
-                if (match) results = parseInt(match[1]);
-            }
-            trackSearch(query, results);
-        }, 500);
-        if (callback) callback();
-    });
-};

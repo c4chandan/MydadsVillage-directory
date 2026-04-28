@@ -1336,3 +1336,259 @@ a, button, input, .card, .chip, .nav-btn {
         width: 80px;
     }
 }
+
+/* ════════════════════════════════════════════════
+/* FINAL POLISH - UX & VISUAL ENHANCEMENTS
+/* ════════════════════════════════════════════════ */
+
+:root {
+    --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+}
+
+/* ── Base Transitions ── */
+* {
+    transition: all var(--duration-normal) var(--ease-out);
+}
+
+/* ── Background Glow ── */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(ellipse at 20% 20%, rgba(255, 122, 0, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(255, 107, 0, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(255, 122, 0, 0.03) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ── Search Box Glow on Focus ── */
+.search-box:focus-within {
+    border-color: rgba(255, 122, 0, 0.5);
+    box-shadow: 
+        0 0 0 3px rgba(255, 122, 0, 0.15),
+        0 15px 50px rgba(255, 122, 0, 0.15),
+        inset 0 0 30px rgba(255, 255, 255, 0.03);
+}
+
+/* ── Card Animations ── */
+.card {
+    animation: fadeSlideUp var(--duration-slow) var(--ease-out) both;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+}
+
+.card:nth-child(1) { animation-delay: 0ms; }
+.card:nth-child(2) { animation-delay: 40ms; }
+.card:nth-child(3) { animation-delay: 80ms; }
+.card:nth-child(4) { animation-delay: 120ms; }
+.card:nth-child(5) { animation-delay: 160ms; }
+.card:nth-child(6) { animation-delay: 200ms; }
+.card:nth-child(7) { animation-delay: 240ms; }
+.card:nth-child(8) { animation-delay: 280ms; }
+
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 16px 40px var(--accent-glow);
+}
+
+.card:active {
+    transform: scale(0.99);
+}
+
+/* ── Button Effects ── */
+.btn-submit, .btn-view-all {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-submit::after, .btn-view-all::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+}
+
+.btn-submit:active::after, .btn-view-all:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* ── Voice Button ── */
+.voice-btn, #voiceBtn {
+    position: relative;
+}
+
+.voice-btn.recording, #voiceBtn.recording {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.voice-btn.recording::before, #voiceBtn.recording::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    animation: ripple 1.5s ease-out infinite;
+}
+
+@keyframes ripple {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* ── Input Focus ── */
+input:focus {
+    outline: none;
+}
+
+input:focus::placeholder {
+    color: var(--accent);
+}
+
+/* ── Nav Active ── */
+.nav-btn.active i {
+    transform: translateY(-3px);
+    color: var(--accent);
+}
+
+/* ── Chip ── */
+.chip:hover {
+    transform: translateY(-2px);
+    background: var(--surface-elevated);
+}
+
+.chip.active {
+    background: var(--accent);
+    box-shadow: 0 6px 20px var(--accent-glow);
+}
+
+/* ── FAB ── */
+.fab:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 16px 40px var(--accent-glow);
+}
+
+.fab:active {
+    transform: scale(0.95);
+}
+
+/* ── Modal ── */
+.modal {
+    animation: modalIn var(--duration-normal) var(--ease-out);
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-bg.open {
+    animation: fadeIn var(--duration-fast) var(--ease-out);
+}
+
+/* ── Toast ── */
+.toast.show {
+    animation: toastIn var(--duration-normal) var(--ease-out), fadeIn var(--duration-fast);
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Skeleton Loading ── */
+.skeleton {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface-elevated) 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* ── Empty State ── */
+.empty-state i {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* ── Spinner ── */
+.spinner {
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Install Banner ── */
+.install-prompt {
+    animation: slideDown var(--duration-slow) var(--ease-out);
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+
+.install-prompt.show {
+    display: block;
+}
+
+/* ── Smooth Scroll ── */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ── Prevent Selection on UI ── */
+.card, .chip, .nav-btn, .btn-submit {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* ── Loading Overlay ── */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 15, 15, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn var(--duration-normal);
+}
