@@ -297,6 +297,21 @@ function loadRecords(callback) {
     var list = document.getElementById('resultsList');
     if (list) list.innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--text-dim)">' + t('loading') + '</p>';
     
+    // Try local cache first (always works)
+    var cached = localStorage.getItem(CONFIG.CACHE_KEY);
+    if (cached) {
+        try { 
+            records = JSON.parse(cached); 
+            renderHome();
+            updateStats();
+            console.log('Loaded from local cache');
+            return;
+        } catch (e) { 
+            console.log('Cache parse error, trying Supabase...');
+        }
+    }
+    
+    // Try Supabase
     var client = getSupabaseClient();
     if (client) {
         client.from('records').select('id, name, village, price, note, created_at')
@@ -304,7 +319,7 @@ function loadRecords(callback) {
             .limit(50)
             .then(function(resp) {
                 if (resp.error || !resp.data || resp.data.length === 0) {
-                    showToast(t('errorLoading'), 'error');
+                    console.log('Supabase error or empty:', resp.error);
                     loadFromFallback(callback);
                     return;
                 }
@@ -321,21 +336,56 @@ function loadRecords(callback) {
                 saveToCache();
                 renderHome();
                 updateStats();
+                console.log('Loaded from Supabase:', records.length);
             })
-            .catch(function() { loadFromFallback(callback); });
+.catch(function(e) { 
+                console.log('Supabase exception:', e);
+                loadFromFallback(callback); 
+            });
     } else {
         loadFromFallback(callback);
     }
 }
 
 function loadFromFallback(callback) {
-    var cached = localStorage.getItem(CONFIG.CACHE_KEY);
-    if (cached) {
-        try { records = JSON.parse(cached); } catch (e) { records = []; }
-    }
-    if (callback) callback();
-    else renderHome();
-    updateStats();
+    // Try JSON file
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'public/entries.json', true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                var data = JSON.parse(xhr.responseText);
+                if (Array.isArray(data)) {
+                    records = data.slice(0, 50).map(function(r, i) {
+                        return {
+                            id: r.id || (i + 1),
+                            name: safeDisplay(r.name),
+                            village: safeDisplay(r.village),
+                            price: Number(r.price) || 0,
+                            note: '',
+                            ts: Date.now() - i * 1000
+                        };
+                    });
+                    saveToCache();
+                    console.log('Loaded from JSON file:', records.length);
+                }
+            } catch(e) {
+                console.log('JSON parse error:', e);
+                records = [];
+            }
+        }
+        if (callback) callback();
+        else renderHome();
+        updateStats();
+    };
+    xhr.onerror = function() {
+        console.log('JSON load failed');
+        records = [];
+        if (callback) callback();
+        else renderHome();
+        updateStats();
+    };
+    xhr.send();
 }
 
 function saveToCache() {
