@@ -370,15 +370,6 @@ input, button, select, textarea {
 }
 
 .search-action-btn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 20px rgba(255, 122, 0, 0.5);
-}
-    transition: all 0.3s;
-    border: none;
-    margin-left: 8px;
-}
-
-.search-action-btn:hover {
     background: var(--accent-light);
     transform: scale(1.05);
 }
@@ -889,4 +880,459 @@ mark {
     .header h1 { font-size: 1.6rem; }
     .lang-toggle { padding: 8px 12px; font-size: 0.75rem; }
     .install-prompt { width: calc(100% - 24px); top: 12px; }
+}
+
+/* ════════════════════════════════════════════════
+/* ANIMATIONS & TRANSITIONS
+/* ════════════════════════════════════════════════ */
+
+:root {
+    --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+}
+
+/* ── Global Transitions ── */
+a, button, input, .card, .chip, .nav-btn {
+    transition: all var(--duration-normal) var(--ease-out);
+}
+
+/* ── Fade In ── */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ── Fade Slide Up ── */
+@keyframes fadeSlideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* ── Fade Scale In ── */
+@keyframes fadeScaleIn {
+    from { 
+        opacity: 0; 
+        transform: scale(0.95); 
+    }
+    to { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+}
+
+/* ── Pulse Animation ── */
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: scale(1.1); 
+        opacity: 0.8; 
+    }
+}
+
+/* ── Glow Ring (Voice) ── */
+@keyframes glowRing {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 122, 0, 0.7),
+                    0 0 20px 5px rgba(255, 122, 0, 0.3);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(255, 122, 0, 0),
+                    0 0 20px 5px rgba(255, 122, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 122, 0, 0),
+                    0 0 20px 5px rgba(255, 122, 0, 0);
+    }
+}
+
+/* ── Shimmer Effect (Skeleton) ── */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--surface) 25%,
+        var(--surface-elevated) 50%,
+        var(--surface) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+}
+
+.skeleton-title {
+    height: 24px;
+    width: 60%;
+    margin-bottom: 12px;
+}
+
+.skeleton-card {
+    height: 100px;
+    margin-bottom: 12px;
+}
+
+/* ── Search Box Focus Glow ── */
+.search-box:focus-within {
+    border-color: rgba(255, 122, 0, 0.4);
+    box-shadow: 
+        0 0 0 3px rgba(255, 122, 0, 0.15),
+        0 12px 40px rgba(255, 122, 0, 0.12),
+        inset 0 0 25px rgba(255, 255, 255, 0.04);
+}
+
+/* ── Suggestions Fade Slide ── */
+.suggestions {
+    animation: fadeSlideUp var(--duration-normal) var(--ease-out);
+}
+
+/* ── Card Hover Lift ── */
+.card:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 12px 32px var(--accent-glow);
+    border-color: var(--border-light);
+}
+
+/* Card Animation Base */
+.card {
+    animation: fadeSlideUp var(--duration-slow) var(--ease-out) both;
+}
+
+.card:nth-child(1) { animation-delay: 0ms; }
+.card:nth-child(2) { animation-delay: 50ms; }
+.card:nth-child(3) { animation-delay: 100ms; }
+.card:nth-child(4) { animation-delay: 150ms; }
+.card:nth-child(5) { animation-delay: 200ms; }
+.card:nth-child(6) { animation-delay: 250ms; }
+.card:nth-child(7) { animation-delay: 300ms; }
+.card:nth-child(8) { animation-delay: 350ms; }
+
+/* ── Voice Button Recording ── */
+.mic-btn.recording {
+    animation: pulse 1s ease-in-out infinite, glowRing 1.5s ease-out infinite;
+}
+
+#voiceBtn.recording {
+    animation: pulse 1s ease-in-out infinite, glowRing 1.5s ease-out infinite;
+}
+
+/* ── Page Transitions ── */
+.view-transition {
+    animation: fadeScaleIn var(--duration-normal) var(--ease-out);
+}
+
+/* ── FAB Hover ── */
+.fab:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 12px 30px var(--accent-glow);
+}
+
+.fab:active {
+    transform: scale(0.95);
+}
+
+/* ── Chip Hover ── */
+.chip:hover {
+    background: var(--surface-elevated);
+    border-color: var(--accent-dim);
+    transform: translateY(-1px);
+}
+
+.chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+/* ── Nav Button Active ── */
+.nav-btn.active i {
+    transform: translateY(-3px);
+}
+
+/* ── Button Hover Effects ── */
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px var(--accent-glow);
+}
+
+.btn-submit:active {
+    transform: scale(0.97);
+}
+
+.btn-view-all:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+/* ── Modal Animation ── */
+.modal {
+    animation: fadeScaleIn var(--duration-normal) var(--ease-out);
+}
+
+.modal-bg.open {
+    animation: fadeIn var(--duration-fast) var(--ease-out);
+}
+
+/* ── Toast Animation ── */
+.toast.show {
+    animation: fadeSlideUp var(--duration-normal) var(--ease-out), fadeIn var(--duration-fast);
+}
+
+/* ── Loading Spinner ── */
+.spinner {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ════════════════════════════════════════════════
+/* ANALYTICS DASHBOARD STYLES
+/* ════════════════════════════════════════════════ */
+
+.analytics-container {
+    padding: 20px 0;
+}
+
+.analytics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.analytics-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.analytics-filters {
+    display: flex;
+    gap: 8px;
+}
+
+.analytics-filter {
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-out);
+}
+
+.analytics-filter:hover {
+    border-color: var(--text-secondary);
+    color: var(--text);
+}
+
+.analytics-filter.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+.analytics-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.analytics-stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    text-align: center;
+    animation: fadeSlideUp var(--duration-slow) var(--ease-out) both;
+}
+
+.analytics-stat-card:nth-child(1) { animation-delay: 0ms; }
+.analytics-stat-card:nth-child(2) { animation-delay: 50ms; }
+.analytics-stat-card:nth-child(3) { animation-delay: 100ms; }
+
+.analytics-stat-value {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent);
+    margin-bottom: 4px;
+    display: block;
+}
+
+.analytics-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+
+.analytics-section {
+    margin-bottom: 32px;
+}
+
+.analytics-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Bar Chart */
+.bar-chart {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+}
+
+.bar-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.bar-item:last-child {
+    margin-bottom: 0;
+}
+
+.bar-label {
+    width: 120px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bar-track {
+    flex: 1;
+    height: 24px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin: 0 12px;
+}
+
+.bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    border-radius: var(--radius-sm);
+    transition: width var(--duration-slow) var(--ease-out);
+    min-width: 2px;
+}
+
+.bar-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+    min-width: 40px;
+    text-align: right;
+}
+
+/* Recent Searches List */
+.recent-searches {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+}
+
+.search-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.search-item:last-child {
+    border-bottom: none;
+}
+
+.search-query {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.search-time {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+/* Empty State */
+.analytics-empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-dim);
+}
+
+.analytics-empty i {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+/* Clear Button */
+.btn-clear {
+    background: var(--danger-dim);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-out);
+}
+
+.btn-clear:hover {
+    background: var(--danger);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .analytics-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .analytics-header {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .bar-label {
+        width: 80px;
+    }
 }

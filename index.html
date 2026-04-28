@@ -7,6 +7,7 @@
     <meta name="description" content="Digital searchable directory for my dad's village notebook records — search by name or village instantly.">
     <meta name="theme-color" content="#ff6b00">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Village Dir">
     <link rel="manifest" href="manifest.json">
@@ -136,6 +137,46 @@
         <div id="adminList" class="records"></div>
     </div>
 
+    <!-- ════════ ANALYTICS VIEW ════════ -->
+    <div id="analyticsView" class="hidden">
+        <div class="analytics-container">
+            <div class="analytics-header">
+                <h2 class="analytics-title"><i data-lucide="bar-chart-2"></i> Analytics</h2>
+                <div class="analytics-filters">
+                    <button class="analytics-filter active" id="filterAll" onclick="setAnalyticsFilter('all')">All Time</button>
+                    <button class="analytics-filter" id="filterToday" onclick="setAnalyticsFilter('today')">Today</button>
+                    <button class="btn-clear" onclick="clearAnalytics()">Clear</button>
+                </div>
+            </div>
+            <div class="analytics-stats">
+                <div class="analytics-stat-card">
+                    <div class="analytics-stat-value" id="totalSearches">0</div>
+                    <div class="analytics-stat-label">Total Searches</div>
+                </div>
+                <div class="analytics-stat-card">
+                    <div class="analytics-stat-value" id="uniqueQueries">0</div>
+                    <div class="analytics-stat-label">Unique Queries</div>
+                </div>
+                <div class="analytics-stat-card">
+                    <div class="analytics-stat-value" id="totalResults">0</div>
+                    <div class="analytics-stat-label">Results Found</div>
+                </div>
+            </div>
+            <div class="analytics-section">
+                <h3 class="analytics-section-title"><i data-lucide="search"></i> Top Searched Names</h3>
+                <div class="bar-chart" id="topNamesChart"></div>
+            </div>
+            <div class="analytics-section">
+                <h3 class="analytics-section-title"><i data-lucide="map-pin"></i> Top Searched Villages</h3>
+                <div class="bar-chart" id="topVillagesChart"></div>
+            </div>
+            <div class="analytics-section">
+                <h3 class="analytics-section-title"><i data-lucide="clock"></i> Recent Searches</h3>
+                <div class="recent-searches" id="recentSearchesList"></div>
+            </div>
+        </div>
+    </div>
+
 </div><!-- /.app -->
 
 <!-- Bottom Navigation -->
@@ -147,6 +188,10 @@
     <button class="nav-btn" id="navBrowse" onclick="switchView('browse')">
         <i data-lucide="layout-grid"></i>
         <span id="navBrowseText">Explore</span>
+    </button>
+    <button class="nav-btn" id="navAnalytics" onclick="switchView('analytics')">
+        <i data-lucide="bar-chart-2"></i>
+        <span>Stats</span>
     </button>
     <button class="nav-btn" id="navAdmin" onclick="switchView('admin')">
         <i data-lucide="lock"></i>

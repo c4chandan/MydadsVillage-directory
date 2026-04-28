@@ -1,0 +1,11 @@
+{
+  "info": {
+    "name": "MyDad's Village Directory",
+    "description": "Digital searchable directory for village notebook records with voice search",
+    "icon": "https://cdn-icons-png.flaticon.com/512/588/588395.png",
+    "avatar_url": "https://cdn-icons-png.flaticon.com/512/588/588395.png"
+  },
+  "host": {
+    "type": "static"
+  }
+}

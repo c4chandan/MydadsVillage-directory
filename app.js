@@ -1,17 +1,17 @@
-// ════════════════════════════════════════════════
-// Language System
-// ════════════════════════════════════════════════
+// Village Directory - Production Grade
+var STORAGE_KEY = 'village_directory_db';
+var CACHE_KEY = 'village_cache';
+var records = [];
+var currentSort = 'newest';
+var browseSortMode = 'newest';
+var currentView = 'home';
+var HOME_LIMIT = 8;
+var isOnline = navigator.onLine;
+var supabaseClient = null;
 
-// Supabase initialization
-const STORAGE_KEY = 'village_directory_db';
-let records = [];
-let currentSort = 'newest';
-let browseSortMode = 'newest';
-let currentView = 'home';
-let deferredPrompt;
-const HOME_LIMIT = 8;
-
-const LANG = {
+// Language strings
+var LANG = {
+    en: {
         title: 'Find Records <span style="color:var(--accent)">Instantly</span>',
         subtitle: "Transform handwritten records into a powerful digital search experience.",
         searchPlaceholder: "Search by name or village...",
@@ -19,7 +19,7 @@ const LANG = {
         home: "Home", admin: "Admin", explore: "Explore",
         manage: "Manage Records", backup: "Backup", load: "Import",
         addNew: "New Record", editRecord: "Edit Record",
-        nameLabel: "Full Name", villageLabel: "Village Name", priceLabel: "Amount (₹)", noteLabel: "Note",
+        nameLabel: "Full Name", villageLabel: "Village Name", priceLabel: "Amount", noteLabel: "Note",
         namePlaceholder: "e.g. Ram Singh",
         villagePlaceholder: "e.g. Bhatni",
         pricePlaceholder: "e.g. 101",
@@ -32,28 +32,29 @@ const LANG = {
         enterPin: "Admin Login", pinSubtext: "Secure access for management",
         login: "Sign In", back: "Cancel", wrongPin: "Invalid User ID or Password!",
         totalRecords: "Total Records", totalAmount: "Total Amount", villages: "Villages",
-        install: "Install Directory App", installText: "Fast, offline & ready on your home screen",
-        adminSearch: "Search records...", langBtn: "हिंदी",
-        loading: "Loading records...", resultsFound: "results found",
+        install: "Install Directory App", installText: "Fast, offline and ready on your home screen",
+        adminSearch: "Search records...", langBtn: "Hindi",
+        loading: "Loading...", resultsFound: "results found",
         recentEntries: "Recent Entries",
         viewAllRecords: "View All Records",
         browseAll: "All Entries",
-        voiceAdd: "Voice Add",
-        sayName: "Say Name...",
-        sayVillage: "Say Village...",
-        sayPrice: "Say Price...",
-        voiceFinished: "Voice Entry Done!",
-        passwordLabel: "Password"
+        passwordLabel: "Password",
+        errorLoading: "Unable to load records",
+        networkError: "Network error",
+        offline: "Offline Mode - Showing cached data",
+        searchError: "Search failed. Try again.",
+        authRequired: "Please login to manage records",
+        logout: "Logout"
     },
     hi: {
         title: 'रिकॉर्ड तुरंत <span style="color:var(--accent)">खोजें</span>',
         subtitle: "लिखे हुए रिकॉर्ड को एक शक्तिशाली डिजिटल सर्च अनुभव में बदलें।",
         searchPlaceholder: "नाम या गाँव से खोजें...",
-        newest: "नया", name: "नाम", price: "कीमत", village: "गाँव",
+        newest: "ना", name: "नाम", price: "कीमत", village: "गाँव",
         home: "होम", admin: "एडमिन", explore: "एक्सप्लोर",
         manage: "रिकॉर्ड प्रबंधन", backup: "बैकअप", load: "लोड",
         addNew: "नया रिकॉर्ड", editRecord: "एडिट करें",
-        nameLabel: "पूरा नाम", villageLabel: "गाँव का नाम", priceLabel: "राशि (₹)", noteLabel: "नोट",
+        nameLabel: "पूरा नाम", villageLabel: "गाँव का नाम", priceLabel: "राशि", noteLabel: "नोट",
         namePlaceholder: "जैसे: राम सिंह",
         villagePlaceholder: "जैसे: भटनी",
         pricePlaceholder: "जैसे: 101",
@@ -66,23 +67,24 @@ const LANG = {
         enterPin: "एडमिन लॉगिन", pinSubtext: "मैनेजमेंट के लिए सुरक्षित लॉगिन",
         login: "लॉगिन करें", back: "रद्द करें", wrongPin: "गलत आईडी या पासवर्ड!",
         totalRecords: "कुल रिकॉर्ड", totalAmount: "कुल राशि", villages: "गाँव",
-        install: "ऐप इंस्टॉल करें", installText: "तेज़, ऑफलाइन और आपकी होम स्क्रीन पर तैयार",
+        install: "ऐप इंस्टॉल करें", installText: "तेज़, ऑफलाइन और होम स्क्रीन पर तैयार",
         adminSearch: "रिकॉर्ड खोजें...", langBtn: "English",
-        loading: "रिकॉर्ड लोड हो रहे हैं...", resultsFound: "रिकॉर्ड मिले",
+        loading: "लोड हो रहा है...", resultsFound: "रिकॉर्ड मिले",
         recentEntries: "हाल के रिकॉर्ड",
         viewAllRecords: "सभी रिकॉर्ड देखें",
         browseAll: "सभी रिकॉर्ड",
-        voiceAdd: "बोलकर जोड़ें",
-        sayName: "नाम बोलें...",
-        sayVillage: "गाँव का नाम बोलें...",
-        sayPrice: "कीमत बोलें...",
-        voiceFinished: "बोलना समाप्त!",
-        passwordLabel: "पासवर्ड"
+        passwordLabel: "पासवर्ड",
+        errorLoading: "रिकॉर्ड लोड नहीं हो सके",
+        networkError: "नेटवर्क त्रुटि",
+        offline: "ऑफलाइन मोड - कैश्ड डेटा दिखा रहे हैं",
+        searchError: "खोज विफल। पुनः प्रयास करें।",
+        authRequired: "रिकॉर्ड प्रबंधन के लिए कृपया लॉगिन करें",
+        logout: "लॉग आउट"
     }
 };
 
-let currentLang = localStorage.getItem('app_lang') || 'hi';
-const t = (key) => LANG[currentLang][key] || key;
+var currentLang = localStorage.getItem('app_lang') || 'hi';
+function t(key) { return LANG[currentLang][key] || key; }
 
 function toggleLang() {
     currentLang = currentLang === 'hi' ? 'en' : 'hi';
@@ -94,528 +96,522 @@ function toggleLang() {
 }
 
 function applyLang() {
-    const map = {
-        appTitle: 'title',
-        appSubtitle: 'subtitle',
-        langBtnText: 'langBtn',
-        navHomeText: 'home',
-        navAdminText: 'admin',
-        navBrowseText: 'explore',
-        installText: 'installText',
-        installBtn: 'install',
-        browseTitle: 'browseAll',
-        homeSectionTitleText: 'recentEntries',
+    var map = {
+        appTitle: 'title', appSubtitle: 'subtitle', langBtnText: 'langBtn',
+        navHomeText: 'home', navAdminText: 'admin', navBrowseText: 'explore',
+        installText: 'installText', installBtn: 'install',
+        browseTitle: 'browseAll', homeSectionTitleText: 'recentEntries',
         viewAllBtnText: 'viewAllRecords'
     };
-    for (const [id, key] of Object.entries(map)) {
-        const el = document.getElementById(id);
-        if (el && key) {
-            if (id === 'homeSectionTitleText') {
-                // Keep icon
-                const icon = el.previousElementSibling;
-                el.textContent = t(key);
-            } else {
-                el.textContent = t(key);
-            }
-        }
+    for (var id in map) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = t(map[id]);
     }
-    
-    // Custom handling for homeSectionTitle which has an icon
-    const homeSectionTitle = document.getElementById('homeSectionTitle');
+    var homeSectionTitle = document.getElementById('homeSectionTitle');
     if (homeSectionTitle) {
-        homeSectionTitle.innerHTML = `<i data-lucide="clock"></i> ${t('recentEntries')}`;
+        homeSectionTitle.innerHTML = '<i data-lucide="clock"></i> ' + t('recentEntries');
         lucide.createIcons();
     }
-
-    const ms = document.getElementById('mainSearch');
+    var ms = document.getElementById('mainSearch');
     if (ms) ms.placeholder = t('searchPlaceholder');
-    
-    // Login modal labels
-    const loginUserLabel = document.querySelector('label[for="adminUser"]');
-    const loginPassLabel = document.querySelector('label[for="adminPass"]');
-    if (loginUserLabel) loginUserLabel.textContent = t('nameLabel'); // reusing nameLabel for "User ID"
-    if (loginPassLabel) loginPassLabel.textContent = t('passwordLabel') || "Password"; 
-    
-    // Chips
-    const chipLabels = [
-        ['chipNewest', 'bChipNewest', '🕐 ' + t('newest')],
-        ['chipName',   'bChipName',   '🔤 ' + t('name')],
-        ['chipPrice',  'bChipPrice',  '💰 ' + t('price')],
-        ['chipVillage','bChipVillage','🏘️ ' + t('village')]
-    ];
-    chipLabels.forEach(([id1, id2, label]) => {
-        const el1 = document.getElementById(id1);
-        const el2 = document.getElementById(id2);
-        if (el1) el1.textContent = label;
-        if (el2) el2.textContent = label;
-    });
-
-    // Login
-    const lt = document.getElementById('loginTitle');
-    const ls = document.getElementById('loginSubtext');
-    const lb = document.getElementById('loginBtn');
-    const lbb = document.getElementById('loginBackBtn');
+    var lt = document.getElementById('loginTitle');
+    var ls = document.getElementById('loginSubtext');
+    var lb = document.getElementById('loginBtn');
+    var lbb = document.getElementById('loginBackBtn');
     if (lt) lt.textContent = t('enterPin');
     if (ls) ls.textContent = t('pinSubtext');
     if (lb) lb.textContent = t('login');
     if (lbb) lbb.textContent = t('back');
-    
-    const va = document.getElementById('voiceAddText');
-    if (va) va.textContent = t('voiceAdd');
-
-    // Dynamic Hero Text
-    const at = document.getElementById('appTitle');
-    const as = document.getElementById('appSubtitle');
+    var at = document.getElementById('appTitle');
+    var as = document.getElementById('appSubtitle');
     if (at) at.innerHTML = t('title');
     if (as) as.textContent = t('subtitle');
-
-    // Install Banner
-    const it = document.getElementById('installText');
-    const is = document.getElementById('installSubtext');
-    const il = document.getElementById('installBtnLabel');
+    var it = document.getElementById('installText');
+    var is = document.getElementById('installSubtext');
+    var il = document.getElementById('installBtnLabel');
     if (it) it.textContent = t('install');
     if (is) is.textContent = t('installText');
     if (il) il.textContent = t('install');
 }
 
+// Security functions
+function sanitizeInput(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;').slice(0, 500);
+}
 
-// ════════════════════════════════════════════════
-// Data Layer
-// ════════════════════════════════════════════════
-const STORAGE_KEY = 'village_directory_db';
-let records = [];
-let currentSort = 'newest';
-let browseSortMode = 'newest';
-let currentView = 'home';
-let deferredPrompt;
-const HOME_LIMIT = 8; // Max records to show on home by default
+function sanitizeForSearch(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str.trim().toLowerCase().slice(0, 100);
+}
 
-async function loadRecords() {
-    const list = document.getElementById('resultsList');
-    list.innerHTML = `<div class="spinner"></div><p style="text-align:center;color:var(--text-dim)">${t('loading')}</p>`;
+function validateRecord(name, village, price) {
+    if (!name || name.length < 2) return { valid: false, error: 'Name must be at least 2 characters' };
+    if (!village || village.length < 2) return { valid: false, error: 'Village must be at least 2 characters' };
+    if (typeof price !== 'number' || price < 0 || price > 999999) return { valid: false, error: 'Invalid price amount' };
+    return { valid: true };
+}
 
-    // ALWAYS try Supabase first
+function safeDisplay(str, fallback) {
+    fallback = fallback || 'Unknown';
+    if (!str || typeof str !== 'string') return fallback;
+    var trimmed = str.trim();
+    return trimmed.length > 0 ? escapeHtml(trimmed) : fallback;
+}
+
+function safePriceDisplay(price, fallback) {
+    fallback = fallback || 'N/A';
+    if (price === null || price === undefined || isNaN(price)) return fallback;
+    var num = Number(price);
+    if (isNaN(num) || num < 0) return fallback;
+    return '₹' + num.toLocaleString('en-IN');
+}
+
+function escapeHtml(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function highlight(text, query) {
+    if (!query || !text) return text;
+    var escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var regex = new RegExp('(' + escaped + ')', 'gi');
+    return String(text).replace(regex, '<mark>$1</mark>');
+}
+
+// Supabase client
+function getSupabaseClient() {
+    if (supabaseClient) return supabaseClient;
     if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-        try {
-            console.log('Trying Supabase with URL:', window.SUPABASE_URL);
-            const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-            
-            // Test fetch
-            const { data, error, count } = await client
-                .from('records')
-                .select('*', { count: 'exact' });
-            
-            console.log('Supabase response:', { error, count, data });
-            
-            if (error) {
-                console.log('Supabase error:', error.message);
-                list.innerHTML = `<div class="empty-state"><i data-lucide="alert-circle"></i><p>DB Error: ${error.message}</p></div>`;
-                lucide.createIcons();
+        supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    }
+    return supabaseClient;
+}
+
+// Check if user is authenticated
+function isAuthenticated() {
+    var session = sessionStorage.getItem('supabase_session');
+    return session ? true : false;
+}
+
+function getSession() {
+    var session = sessionStorage.getItem('supabase_session');
+    return session ? JSON.parse(session) : null;
+}
+
+// Load records from Supabase
+function loadRecords(callback) {
+    var list = document.getElementById('resultsList');
+    if (list) {
+        list.innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--text-dim)">' + t('loading') + '</p>';
+    }
+    
+    var client = getSupabaseClient();
+    console.log('Supabase client:', !!client, 'URL:', window.SUPABASE_URL);
+    
+    if (client) {
+        client.from('records').select('id, name, village, price, note, created_at').order('created_at', { ascending: false }).limit(100).then(function(response) {
+            console.log('Supabase response:', response);
+            if (response.error) {
+                console.log('Load error:', response.error.message);
+                loadFromCacheOrFallback(callback);
                 return;
             }
-            
-            if (data && data.length > 0) {
-                records = data.map(r => ({
-                    id: r.id,
-                    name: r.name,
-                    village: r.village,
-                    price: r.price || 0,
-                    note: r.note || '',
-                    ts: r.created_at ? new Date(r.created_at).getTime() : Date.now()
-                }));
-                console.log('✅ Loaded from Supabase:', records.length);
-                saveRecords();
-renderHome();
-            return;
-        } catch (e) {
-        }
-
-        // Fallback to localStorage
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            try { records = JSON.parse(stored); } catch (e) { records = []; }
-            console.log('Loaded from localStorage:', records.length);
-            updateStats();
-            renderHome();
-            return;
-        }
-            
-            list.innerHTML = `<div class="empty-state"><i data-lucide="database"></i><p>No records in database</p></div>`;
-            lucide.createIcons();
-            return;
-        } catch (e) {
-            console.log('Supabase exception:', e.message);
-        }
+            if (response.data && response.data.length > 0) {
+                records = response.data.slice(0, 100).map(function(r) {
+                    return {
+                        id: r.id,
+                        name: safeDisplay(r.name, 'Unknown'),
+                        village: safeDisplay(r.village, 'Unknown'),
+                        price: Number(r.price) || 0,
+                        note: safeDisplay(r.note, ''),
+                        ts: r.created_at ? new Date(r.created_at).getTime() : Date.now()
+                    };
+                });
+                saveCache();
+                console.log('Loaded from Supabase:', records.length);
+                if (callback) callback();
+                else renderHome();
+                updateStats();
+                return;
+            }
+            console.log('No data in Supabase');
+            loadFromCacheOrFallback(callback);
+        }).catch(function(e) {
+            console.log('Exception:', e);
+            loadFromCacheOrFallback(callback);
+        });
     } else {
-        console.log('Supabase not configured');
+        console.log('No Supabase client');
+        loadFromCacheOrFallback(callback);
     }
+}
 
-    // Fallback to localStorage
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-        try { records = JSON.parse(stored); } catch (e) { records = []; }
-        console.log('Loaded from localStorage:', records.length);
-        renderHome();
+function loadFromCacheOrFallback(callback) {
+    // Try cache first
+    var cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+        try {
+            records = JSON.parse(cached);
+            console.log('Loaded from cache:', records.length);
+            if (callback) callback();
+            else renderHome();
+            updateStats();
+            return;
+        } catch (e) {
+            console.log('Cache parse error:', e);
+        }
+    }
+    
+    // Try JSON file
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'public/entries.json', true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                var data = JSON.parse(xhr.responseText);
+                if (Array.isArray(data)) {
+                    records = data.slice(0, 100).map(function(r, i) {
+                        return {
+                            id: r.id || i + 1,
+                            name: safeDisplay(r.name, 'Unknown'),
+                            village: safeDisplay(r.village, 'Unknown'),
+                            price: Number(r.price) || 0,
+                            note: safeDisplay(r.note, ''),
+                            ts: Date.now() - i * 1000
+                        };
+                    });
+                    saveCache();
+                    console.log('Loaded from JSON:', records.length);
+                }
+            } catch(e) {
+                console.log('JSON parse error:', e);
+            }
+        }
+        if (callback) callback();
+        else renderHome();
+        updateStats();
+    };
+    xhr.onerror = function() {
+        console.log('JSON load failed');
+        if (callback) callback();
+        else renderHome();
+        updateStats();
+    };
+    xhr.send();
+}
+
+function saveCache() {
+    try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(records));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    } catch (e) {}
+}
+
+// Database-level search (Supabase)
+function searchRecordsDB(query, callback) {
+    var list = document.getElementById('resultsList');
+    if (!list) return;
+    
+    list.innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--text-dim)">' + t('loading') + '</p>';
+    
+    var client = getSupabaseClient();
+    if (client && query) {
+        client.from('records').select('id, name, village, price, note, created_at')
+            .or('name.ilike.%' + query + '%,village.ilike.%' + query + '%')
+            .order('created_at', { ascending: false })
+            .limit(20)
+            .then(function(response) {
+                if (response.error) {
+                    list.innerHTML = '<div class="empty-state"><i data-lucide="alert-circle"></i><p>' + t('searchError') + '</p></div>';
+                    lucide.createIcons();
+                    return;
+                }
+                if (response.data && response.data.length > 0) {
+                    var items = response.data.map(function(r) {
+                        return {
+                            id: r.id,
+                            name: safeDisplay(r.name, 'Unknown'),
+                            village: safeDisplay(r.village, 'Unknown'),
+                            price: Number(r.price) || 0,
+                            note: safeDisplay(r.note, ''),
+                            ts: r.created_at ? new Date(r.created_at).getTime() : Date.now()
+                        };
+                    });
+                    renderSearchResults(items, query);
+                } else {
+                    list.innerHTML = '<div class="empty-state"><i data-lucide="search-x"></i><p>' + t('noRecords') + '</p></div>';
+                    lucide.createIcons();
+                }
+                if (callback) callback();
+            });
+    } else {
+        if (callback) callback();
+        else renderHome();
+    }
+}
+
+function renderSearchResults(items, query) {
+    var list = document.getElementById('resultsList');
+    var countEl = document.getElementById('resultCount');
+    var viewAllBox = document.getElementById('viewAllContainer');
+    var homeTitle = document.getElementById('homeSectionTitle');
+    
+    if (!list) return;
+    
+    countEl.textContent = items.length + ' ' + t('resultsFound');
+    viewAllBox.classList.add('hidden');
+    homeTitle.innerHTML = '<i data-lucide="search"></i> ' + t('resultsFound');
+    
+    if (!items.length) {
+        list.innerHTML = '<div class="empty-state"><i data-lucide="search-x"></i><p>' + t('noRecords') + '</p></div>';
+        lucide.createIcons();
         return;
     }
-
-    // Fetch from JSON file
-    try {
-        const res = await fetch('public/entries.json');
-        if (!res.ok) throw new Error('Network response was not ok');
-        const data = await res.json();
-        records = data.map((r, i) => ({
-            id: i + 1,
-            name: (r.name || '').trim(),
-            village: (r.village || '').trim(),
-            price: Number(r.price) || 0,
-            note: (r.note || '').trim(),
-            ts: Date.now() - i * 100
-        }));
-        saveRecords();
-    } catch (e) {
-        console.error('Failed to load entries.json:', e);
-        records = [];
-    }
-    renderHome();
+    
+    list.innerHTML = items.map(function(r) { return cardHTML(r, query, false); }).join('');
+    lucide.createIcons();
 }
 
-function saveRecords() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-}
-
-function getNextId() {
-    return records.length ? Math.max(...records.map(r => r.id)) + 1 : 1;
-}
-
-
-// ════════════════════════════════════════════════
-// Stats (Admin Only)
 function updateStats() {
-    const total = records.length;
-    const amount = records.reduce((s, r) => s + (r.price || 0), 0);
-    
-    const sRec = document.getElementById('statRecords');
-    const sRecVal = document.getElementById('statRecordsVal');
-    const sSource = document.getElementById('statSource');
-    
-    if (sRec) sRec.textContent = total;
+    var total = records.length;
+    var sRecVal = document.getElementById('statRecordsVal');
+    var sSource = document.getElementById('statSource');
     if (sRecVal) sRecVal.textContent = total > 0 ? total : '-';
-    if (sSource) sSource.textContent = window.SUPABASE_URL ? 'Cloud' : 'Local';
+    if (sSource) sSource.textContent = isOnline ? 'Cloud' : 'Offline';
 }
 
-
-
-// ════════════════════════════════════════════════
-// Sorting
-// ════════════════════════════════════════════════
 function sortData(data, mode) {
-    const d = [...data];
+    if (!Array.isArray(data) || data.length === 0) return [];
+    var d = data.slice();
     switch (mode || currentSort) {
-        case 'name':    return d.sort((a, b) => a.name.localeCompare(b.name));
-        case 'price':   return d.sort((a, b) => b.price - a.price);
-        case 'village': return d.sort((a, b) => a.village.localeCompare(b.village));
-        default:        return d.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+        case 'name': return d.sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); });
+        case 'price': return d.sort(function(a, b) { return (b.price || 0) - (a.price || 0); });
+        case 'village': return d.sort(function(a, b) { return (a.village || '').localeCompare(b.village || ''); });
+        default: return d.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
     }
 }
 
 function setSort(type, el) {
     currentSort = type;
-    document.querySelectorAll('#homeChips .chip').forEach(c => c.classList.remove('active'));
+    var chips = document.querySelectorAll('#homeChips .chip');
+    for (var i = 0; i < chips.length; i++) chips[i].classList.remove('active');
     el.classList.add('active');
-    const q = document.getElementById('mainSearch').value.trim().toLowerCase();
-    const base = q
-        ? records.filter(r =>
-            r.name.toLowerCase().includes(q) ||
-            r.village.toLowerCase().includes(q))
-        : records;
-    currentQuery = q;
-    renderHome(base);
+    var q = sanitizeForSearch(document.getElementById('mainSearch').value);
+    if (q) {
+        var filtered = records.filter(function(r) {
+            return (r.name || '').toLowerCase().indexOf(q) !== -1 || (r.village || '').toLowerCase().indexOf(q) !== -1;
+        });
+        renderHome(filtered);
+    } else {
+        renderHome();
+    }
 }
 
 function setBrowseSort(type, el) {
     browseSortMode = type;
-    document.querySelectorAll('#browseChips .chip').forEach(c => c.classList.remove('active'));
+    var chips = document.querySelectorAll('#browseChips .chip');
+    for (var i = 0; i < chips.length; i++) chips[i].classList.remove('active');
     el.classList.add('active');
     renderBrowse();
 }
 
-
-// ════════════════════════════════════════════════
-// Highlight helper
-// ════════════════════════════════════════════════
-function highlight(text, query) {
-    if (!query || !text) return text;
-    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`(${escaped})`, 'gi');
-    return String(text).replace(regex, '<mark>$1</mark>');
-}
-
-// Escape HTML to prevent XSS
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-
-// ════════════════════════════════════════════════
-// Card HTML
-// ════════════════════════════════════════════════
 function cardHTML(r, query, showAdmin) {
-    const name    = highlight(escapeHtml(r.name), query);
-    const village = highlight(escapeHtml(r.village), query);
-    const noteHTML = r.note
-        ? `<div class="card-note">${escapeHtml(r.note)}</div>`
-        : '';
-    const adminHTML = showAdmin ? `
-        <div class="admin-actions" style="margin-top:12px; display:flex; gap:8px;">
-            <button class="btn-sm btn-edit" onclick="editRecord(${r.id})" style="background:rgba(255,255,255,0.08); color:white; border:1px solid rgba(255,255,255,0.15); padding:6px 12px; border-radius:var(--radius-md); font-size:0.75rem; font-weight:700; cursor:pointer;">
-                ${t('edit')}
-            </button>
-            <button class="btn-sm btn-del" onclick="deleteRecord(${r.id})" style="background:rgba(255,255,255,0.05); color:var(--danger); border:1px solid rgba(255,255,255,0.1); padding:6px 12px; border-radius:var(--radius-md); font-size:0.75rem; font-weight:700; cursor:pointer;">
-                ${t('delete')}
-            </button>
-        </div>` : '';
-
-    return `<div class="card">
-        <div class="card-info">
-            <div class="card-name">${name}</div>
-            <div class="card-village"><i data-lucide="map-pin"></i>${village}</div>
-            ${noteHTML}
-            ${adminHTML}
-        </div>
-        <div class="card-price">₹${Number(r.price).toLocaleString('en-IN')}</div>
-    </div>`;
+    var safeName = escapeHtml(r.name) || 'Unknown';
+    var safeVillage = escapeHtml(r.village) || 'Unknown';
+    var name = highlight(safeName, query);
+    var village = highlight(safeVillage, query);
+    var noteHTML = r.note ? '<div class="card-note">' + escapeHtml(r.note) + '</div>' : '';
+    var adminHTML = showAdmin ? '<div class="admin-actions" style="margin-top:12px;display:flex;gap:8px;"><button class="btn-sm btn-edit" onclick="editRecord(' + r.id + ')" style="background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.15);padding:6px 12px;border-radius:var(--radius-md);font-size:0.75rem;font-weight:700;cursor:pointer;">' + t('edit') + '</button><button class="btn-sm btn-del" onclick="deleteRecord(' + r.id + ')" style="background:rgba(255,255,255,0.05);color:var(--danger);border:1px solid rgba(255,255,255,0.1);padding:6px 12px;border-radius:var(--radius-md);font-size:0.75rem;font-weight:700;cursor:pointer;">' + t('delete') + '</button></div>' : '';
+    return '<div class="card"><div class="card-info"><div class="card-name">' + name + '</div><div class="card-village"><i data-lucide="map-pin"></i>' + village + '</div>' + noteHTML + adminHTML + '</div><div class="card-price">' + safePriceDisplay(r.price) + '</div></div>';
 }
 
-
-// ════════════════════════════════════════════════
-// Render Home
-// ════════════════════════════════════════════════
-let currentQuery = '';
-let iconsRendered = false;
+var currentQuery = '';
+var iconsRendered = false;
 
 function renderHome(data) {
-    const list = document.getElementById('resultsList');
-    const countEl = document.getElementById('resultCount');
-    const viewAllBox = document.getElementById('viewAllContainer');
-    const homeTitle = document.getElementById('homeSectionTitle');
+    var list = document.getElementById('resultsList');
+    var countEl = document.getElementById('resultCount');
+    var viewAllBox = document.getElementById('viewAllContainer');
+    var homeTitle = document.getElementById('homeSectionTitle');
+    if (!list) return;
     
-    let items = sortData(data !== undefined ? data : records, currentSort);
-    const totalMatching = items.length;
-
+    var items = sortData(data !== undefined ? data : records, currentSort);
+    var totalMatching = items.length;
+    
     if (!currentQuery) {
         items = items.slice(0, HOME_LIMIT);
         viewAllBox.classList.toggle('hidden', totalMatching <= HOME_LIMIT);
-        homeTitle.innerHTML = `<i data-lucide="clock"></i> ${t('recentEntries')}`;
+        homeTitle.innerHTML = '<i data-lucide="clock"></i> ' + t('recentEntries');
     } else {
         viewAllBox.classList.add('hidden');
-        homeTitle.innerHTML = `<i data-lucide="search"></i> ${t('resultsFound')}`;
+        homeTitle.innerHTML = '<i data-lucide="search"></i> ' + t('resultsFound');
     }
-
+    
     if (!items.length) {
-        const msg = currentQuery ? t('noRecords') : t('noData');
-        list.innerHTML = `<div class="empty-state"><i data-lucide="search-x"></i><p>${msg}</p></div>`;
+        var msg = currentQuery ? t('noRecords') : t('noData');
+        list.innerHTML = '<div class="empty-state"><i data-lucide="search-x"></i><p>' + msg + '</p></div>';
         countEl.textContent = '';
+        lucide.createIcons();
         return;
     }
-
-    countEl.textContent = currentQuery ? `${totalMatching} ${t('resultsFound')}` : '';
-    list.innerHTML = items.map(r => cardHTML(r, currentQuery, false)).join('');
     
+    countEl.textContent = currentQuery ? totalMatching + ' ' + t('resultsFound') : '';
+    list.innerHTML = items.map(function(r) { return cardHTML(r, currentQuery, false); }).join('');
     if (!iconsRendered) {
         lucide.createIcons();
         iconsRendered = true;
     }
 }
 
-
-// ════════════════════════════════════════════════
-// Render Browse (All Entries)
-// ════════════════════════════════════════════════
 function renderBrowse() {
-    const list = document.getElementById('browseList');
-    const badge = document.getElementById('browseCountBadge');
-    const items = sortData(records, browseSortMode);
-
+    var list = document.getElementById('browseList');
+    var badge = document.getElementById('browseCountBadge');
+    var items = sortData(records, browseSortMode);
+    if (!list) return;
     if (badge) badge.textContent = items.length;
-
     if (!items.length) {
-        list.innerHTML = `<div class="empty-state"><i data-lucide="book-open"></i><p>${t('noData')}</p></div>`;
+        list.innerHTML = '<div class="empty-state"><i data-lucide="book-open"></i><p>' + t('noData') + '</p></div>';
+        lucide.createIcons();
         return;
     }
-    list.innerHTML = items.map(r => cardHTML(r, '', false)).join('');
+    list.innerHTML = items.map(function(r) { return cardHTML(r, '', false); }).join('');
+    lucide.createIcons();
 }
 
-
-// ════════════════════════════════════════════════
-// Render Admin
-// ════════════════════════════════════════════════
 function renderAdmin(data) {
-    const list   = document.getElementById('adminList');
-    const header = document.getElementById('adminHeader');
-    const items  = data !== undefined ? data : records;
-
-
-    header.innerHTML = `
-        <div class="admin-controls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-            <h2 style="font-weight:800; font-size:1.4rem;">${t('manage')}</h2>
-            <div class="admin-btn-group" style="display:flex; gap:8px;">
-                <button class="btn-sm" onclick="exportData()" style="background:rgba(255,255,255,0.08); color:white; border:1px solid rgba(255,255,255,0.15); padding:10px 16px; border-radius:var(--radius-md); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                    <i data-lucide="download" style="width:16px; height:16px;"></i> ${t('backup')}
-                </button>
-                <button class="btn-sm" onclick="importData()" style="background:rgba(255,255,255,0.08); color:white; border:1px solid rgba(255,255,255,0.15); padding:10px 16px; border-radius:var(--radius-md); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                    <i data-lucide="upload" style="width:16px; height:16px;"></i> ${t('load')}
-                </button>
-            </div>
-        </div>
-
-        <div class="stats">
-            <div class="stat-card">
-                <div class="num" id="statRecords">0</div>
-                <div class="lbl">${t('totalRecords')}</div>
-            </div>
-            <div class="stat-card">
-                <div class="num" id="statAmount">₹0</div>
-                <div class="lbl">${t('totalAmount')}</div>
-            </div>
-            <div class="stat-card">
-                <div class="num" id="statVillages">0</div>
-                <div class="lbl">${t('villages')}</div>
-            </div>
-        </div>
-
-        <div class="search-box" style="margin-bottom:24px;">
-            <i data-lucide="search" style="color:var(--text-dim);width:20px;height:20px;flex-shrink:0"></i>
-            <input type="text" id="adminSearch" placeholder="${t('adminSearch')}"
-                   autocomplete="off" spellcheck="false">
-        </div>`;
-
-    // Attach event listener after HTML is inserted
-    setTimeout(() => {
-        const adminSearchInput = document.getElementById('adminSearch');
+    var list = document.getElementById('adminList');
+    var header = document.getElementById('adminHeader');
+    var items = data !== undefined ? data : records;
+    if (!list || !header) return;
+    
+    var totalAmount = items.reduce(function(s, r) { return s + (r.price || 0); }, 0);
+    var villageCount = {};
+    items.forEach(function(r) { villageCount[r.village] = true; });
+    
+    header.innerHTML = '<div class="admin-controls" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;"><h2 style="font-weight:800;font-size:1.4rem;">' + t('manage') + '</h2><div class="admin-btn-group" style="display:flex;gap:8px;"><button class="btn-sm" onclick="exportData()" style="background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.15);padding:10px 16px;border-radius:var(--radius-md);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;"><i data-lucide="download" style="width:16px;height:16px;"></i>' + t('backup') + '</button><button class="btn-sm" onclick="logout()" style="background:rgba(255,68,68,0.2);color:#ef4444;border:1px solid rgba(255,68,68,0.3);padding:10px 16px;border-radius:var(--radius-md);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;"><i data-lucide="log-out" style="width:16px;height:16px;"></i>' + t('logout') + '</button></div></div><div class="stats"><div class="stat-card"><div class="num" id="statRecords">' + items.length + '</div><div class="lbl">' + t('totalRecords') + '</div></div><div class="stat-card"><div class="num">₹' + totalAmount.toLocaleString('en-IN') + '</div><div class="lbl">' + t('totalAmount') + '</div></div><div class="stat-card"><div class="num">' + Object.keys(villageCount).length + '</div><div class="lbl">' + t('villages') + '</div></div></div><div class="search-box" style="margin-bottom:24px;"><i data-lucide="search" style="color:var(--text-dim);width:20px;height:20px;flex-shrink:0"></i><input type="text" id="adminSearch" placeholder="' + t('adminSearch') + '" autocomplete="off" spellcheck="false"></div>';
+    
+    setTimeout(function() {
+        var adminSearchInput = document.getElementById('adminSearch');
         if (adminSearchInput) {
-            adminSearchInput.addEventListener('input', (e) => onAdminSearch(e.target.value));
+            adminSearchInput.addEventListener('input', function(e) { onAdminSearch(e.target.value); });
         }
     }, 100);
-
-    updateStats();
-
+    lucide.createIcons();
+    
     if (!items.length) {
-        list.innerHTML = `<div class="empty-state"><i data-lucide="database"></i><p>${t('noData')}</p></div>`;
+        list.innerHTML = '<div class="empty-state"><i data-lucide="database"></i><p>' + t('noData') + '</p></div>';
         return;
     }
-    list.innerHTML = items.map(r => cardHTML(r, '', true)).join('');
+    list.innerHTML = items.map(function(r) { return cardHTML(r, '', true); }).join('');
 }
 
 function onAdminSearch(q) {
-    console.log('Admin search:', q);
-    q = q.trim().toLowerCase();
+    q = sanitizeForSearch(q);
     if (!q) { renderAdmin(); return; }
-    renderAdmin(records.filter(r =>
-        r.name.toLowerCase().includes(q) ||
-        r.village.toLowerCase().includes(q)));
+    renderAdmin(records.filter(function(r) {
+        return (r.name || '').toLowerCase().indexOf(q) !== -1 || (r.village || '').toLowerCase().indexOf(q) !== -1;
+    }));
 }
 
+// Debounced search
+var searchTimeout = null;
+var DEBOUNCE_MS = 300;
 
-// ════════════════════════════════════════════════
-// Live Search (Home)
-// ════════════════════════════════════════════════
-document.getElementById('mainSearch').addEventListener('input', (e) => {
-    currentQuery = e.target.value.trim().toLowerCase();
-    syncUrl();
-    if (!currentQuery) {
-        document.getElementById('suggestions').style.display = 'none';
-        renderHome();
-        return;
-    }
-    const filtered = records.filter(r =>
-        r.name.toLowerCase().includes(currentQuery) ||
-        r.village.toLowerCase().includes(currentQuery));
-    renderHome(filtered);
-    showSuggestions(filtered.slice(0, 6), currentQuery);
-});
+function performDebouncedSearch(query) {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() {
+        var q = sanitizeForSearch(query);
+        currentQuery = q;
+        syncUrl();
+        if (!q) {
+            document.getElementById('suggestions').style.display = 'none';
+            renderHome();
+            return;
+        }
+        // Use database search
+        searchRecordsDB(q);
+    }, DEBOUNCE_MS);
+}
+
+var mainSearchInput = document.getElementById('mainSearch');
+if (mainSearchInput) {
+    mainSearchInput.addEventListener('input', function(e) {
+        performDebouncedSearch(e.target.value);
+    });
+}
 
 function showSuggestions(data, q) {
-    const el = document.getElementById('suggestions');
-    if (!q || !data.length) { el.style.display = 'none'; return; }
-    el.innerHTML = data.map(r => `
-        <div class="sug-item" onclick="pickSuggestion(${r.id})">
-            <div>
-                <div class="sug-name">${highlight(r.name, q)}</div>
-                <div class="sug-village">${r.village}</div>
-            </div>
-            <i data-lucide="arrow-up-left" style="width:16px; color:var(--text-dim)"></i>
-        </div>`).join('');
+    var el = document.getElementById('suggestions');
+    if (!el || !q || !data.length) {
+        if (el) el.style.display = 'none';
+        return;
+    }
+    el.innerHTML = data.slice(0, 6).map(function(r) {
+        return '<div class="sug-item" onclick="pickSuggestion(' + r.id + ')"><div><div class="sug-name">' + highlight(escapeHtml(r.name) || 'Unknown', q) + '</div><div class="sug-village">' + escapeHtml(r.village || 'Unknown') + '</div></div><i data-lucide="arrow-up-left" style="width:16px;color:var(--text-dim)"></i></div>';
+    }).join('');
     el.style.display = 'block';
 }
 
-window.pickSuggestion = (id) => {
-    const r = records.find(x => x.id === id);
+window.pickSuggestion = function(id) {
+    var r = records.find(function(x) { return x.id === id; });
     if (!r) return;
     document.getElementById('mainSearch').value = r.name;
-    currentQuery = r.name.toLowerCase();
+    currentQuery = sanitizeForSearch(r.name);
     document.getElementById('suggestions').style.display = 'none';
-    renderHome(records.filter(x => x.name.toLowerCase().includes(currentQuery)));
+    searchRecordsDB(currentQuery);
 };
 
-document.addEventListener('click', (e) => {
+document.addEventListener('click', function(e) {
     if (!e.target.closest('.search-area')) {
         document.getElementById('suggestions').style.display = 'none';
     }
 });
 
-
-// ════════════════════════════════════════════════
-// View Switching
-// ════════════════════════════════════════════════
 function switchView(view) {
     currentView = view;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-
     document.getElementById('homeView').classList.toggle('hidden', view !== 'home');
     document.getElementById('adminView').classList.toggle('hidden', view !== 'admin');
     document.getElementById('browseView').classList.toggle('hidden', view !== 'browse');
-
+    document.getElementById('analyticsView').classList.toggle('hidden', view !== 'analytics');
     document.getElementById('navHome').classList.toggle('active', view === 'home');
     document.getElementById('navAdmin').classList.toggle('active', view === 'admin');
     document.getElementById('navBrowse').classList.toggle('active', view === 'browse');
-
-    const isAdmin = !!sessionStorage.getItem('isAdmin');
-    document.getElementById('addFab').classList.toggle('show', view === 'admin' && isAdmin);
-
+    document.getElementById('navAnalytics').classList.toggle('active', view === 'analytics');
+    document.getElementById('addFab').classList.toggle('show', view === 'admin');
+    
     if (view === 'admin') {
-        if (!isAdmin) {
+        if (!isAuthenticated()) {
             showLogin();
         } else {
             renderAdmin();
         }
     } else if (view === 'browse') {
         renderBrowse();
+    } else if (view === 'analytics') {
+        renderAnalytics();
     } else {
         renderHome();
     }
 }
 
-
-// ════════════════════════════════════════════════
-// Login
-// ════════════════════════════════════════════════
+// Login (simple session-based for this demo)
 function showLogin() {
     applyLang();
     document.getElementById('loginModal').classList.add('open');
-    setTimeout(() => {
-        const field = document.getElementById('adminUser');
+    setTimeout(function() {
+        var field = document.getElementById('adminUser');
         if (field) field.focus();
     }, 300);
 }
 
 function login() {
-    const user = document.getElementById('adminUser').value.trim();
-    const pass = document.getElementById('adminPass').value;
-    
+    var user = document.getElementById('adminUser').value.trim();
+    var pass = document.getElementById('adminPass').value;
     if (user === 'admin' && pass === 'dad123') {
         sessionStorage.setItem('isAdmin', 'true');
+        sessionStorage.setItem('supabase_session', JSON.stringify({ user: { id: 'admin', email: 'admin@example.com' } }));
         document.getElementById('loginModal').classList.remove('open');
         document.getElementById('adminUser').value = '';
         document.getElementById('adminPass').value = '';
@@ -628,9 +624,19 @@ function login() {
     }
 }
 
-document.getElementById('adminPass').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') login();
-});
+function logout() {
+    sessionStorage.removeItem('isAdmin');
+    sessionStorage.removeItem('supabase_session');
+    showToast("Logged out");
+    switchView('home');
+}
+
+var adminPassField = document.getElementById('adminPass');
+if (adminPassField) {
+    adminPassField.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') login();
+    });
+}
 
 function cancelLogin() {
     document.getElementById('loginModal').classList.remove('open');
@@ -639,39 +645,32 @@ function cancelLogin() {
     switchView('home');
 }
 
-
-// ════════════════════════════════════════════════
-// CRUD Modal
-// ════════════════════════════════════════════════
 function openModal(id) {
     document.getElementById('recordModal').classList.add('open');
-
-    // Update labels
-    document.getElementById('fNameLabel').textContent    = t('nameLabel');
+    document.getElementById('fNameLabel').textContent = t('nameLabel');
     document.getElementById('fVillageLabel').textContent = t('villageLabel');
-    document.getElementById('fPriceLabel').textContent   = t('priceLabel');
-    document.getElementById('fNoteLabel').textContent    = t('noteLabel');
-    document.getElementById('fName').placeholder         = t('namePlaceholder');
-    document.getElementById('fVillage').placeholder      = t('villagePlaceholder');
-    document.getElementById('fPrice').placeholder        = t('pricePlaceholder');
-    document.getElementById('fNote').placeholder         = t('notePlaceholder');
-    document.getElementById('saveBtn').textContent       = t('save');
-
+    document.getElementById('fPriceLabel').textContent = t('priceLabel');
+    document.getElementById('fNoteLabel').textContent = t('noteLabel');
+    document.getElementById('fName').placeholder = t('namePlaceholder');
+    document.getElementById('fVillage').placeholder = t('villagePlaceholder');
+    document.getElementById('fPrice').placeholder = t('pricePlaceholder');
+    document.getElementById('fNote').placeholder = t('notePlaceholder');
+    document.getElementById('saveBtn').textContent = t('save');
     if (id) {
-        const r = records.find(x => x.id === id);
+        var r = records.find(function(x) { return x.id === id; });
         if (!r) return;
-        document.getElementById('editId').value    = r.id;
-        document.getElementById('fName').value     = r.name;
-        document.getElementById('fVillage').value  = r.village;
-        document.getElementById('fPrice').value    = r.price;
-        document.getElementById('fNote').value     = r.note || '';
+        document.getElementById('editId').value = r.id;
+        document.getElementById('fName').value = r.name;
+        document.getElementById('fVillage').value = r.village;
+        document.getElementById('fPrice').value = r.price;
+        document.getElementById('fNote').value = r.note || '';
         document.getElementById('modalTitle').textContent = t('editRecord');
     } else {
         document.getElementById('recordForm').reset();
         document.getElementById('editId').value = '';
         document.getElementById('modalTitle').textContent = t('addNew');
     }
-    setTimeout(() => document.getElementById('fName').focus(), 300);
+    setTimeout(function() { document.getElementById('fName').focus(); }, 300);
 }
 
 function closeModal() {
@@ -679,348 +678,357 @@ function closeModal() {
     document.getElementById('recordForm').reset();
 }
 
-document.getElementById('recordModal').addEventListener('click', (e) => {
+document.getElementById('recordModal').addEventListener('click', function(e) {
     if (e.target === document.getElementById('recordModal')) closeModal();
 });
-document.getElementById('loginModal').addEventListener('click', (e) => {
+document.getElementById('loginModal').addEventListener('click', function(e) {
     if (e.target === document.getElementById('loginModal')) cancelLogin();
 });
 
-document.getElementById('recordForm').onsubmit = async (e) => {
+document.getElementById('recordForm').onsubmit = function(e) {
     e.preventDefault();
-    const editId = document.getElementById('editId').value;
-    const name   = document.getElementById('fName').value.trim();
-    const village= document.getElementById('fVillage').value.trim();
-    const price  = parseInt(document.getElementById('fPrice').value) || 0;
-    const note   = document.getElementById('fNote').value.trim();
-
-    // Validation
-    if (!name || name.length < 2) {
-        showToast('Name must be at least 2 characters', 'error');
+    if (!isAuthenticated()) {
+        showToast(t('authRequired'), 'error');
+        showLogin();
         return;
     }
-    if (!village || village.length < 2) {
-        showToast('Village must be at least 2 characters', 'error');
+    var editId = document.getElementById('editId').value;
+    var name = sanitizeInput(document.getElementById('fName').value);
+    var village = sanitizeInput(document.getElementById('fVillage').value);
+    var price = parseInt(document.getElementById('fPrice').value) || 0;
+    var note = sanitizeInput(document.getElementById('fNote').value);
+    var validation = validateRecord(name, village, price);
+    if (!validation.valid) {
+        showToast(validation.error, 'error');
         return;
     }
-    if (price < 0 || price > 999999) {
-        showToast('Invalid price amount', 'error');
-        return;
-    }
-
-    const entry = {
-        id:      editId ? parseInt(editId) : getNextId(),
-        name:    sanitize(name),
-        village: sanitize(village),
-        price:   price,
-        note:    sanitize(note),
-        ts:      editId ? (records.find(x => x.id == editId)?.ts || Date.now()) : Date.now()
-    };
-
-    // Save to Supabase if connected
-    if (supabaseClient && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-        try {
-            if (editId) {
-                await supabaseClient.from('records').update({
-                    name: entry.name,
-                    village: entry.village,
-                    price: entry.price,
-                    note: entry.note
-                }).eq('id', entry.id);
-            } else {
-                await supabaseClient.from('records').insert([{
-                    name: entry.name,
-                    village: entry.village,
-                    price: entry.price,
-                    note: entry.note
-                }]);
-            }
-        } catch (e) {
-            console.log('Supabase save failed, using local');
-        }
-    }
-
+    var client = getSupabaseClient();
+    var recordData = { name: name, village: village, price: price, note: note };
     if (editId) {
-        records = records.map(x => x.id == editId ? entry : x);
+        client.from('records').update(recordData).eq('id', parseInt(editId)).then(function(resp) {
+            if (!resp.error) {
+                records = records.map(function(x) { return x.id == editId ? Object.assign({}, x, recordData) : x; });
+                saveCache();
+                closeModal();
+                renderAdmin();
+                updateStats();
+                showToast(t('saved'));
+            } else {
+                showToast('Error: ' + resp.error.message, 'error');
+            }
+        });
     } else {
-        records.unshift(entry);
-    }
-
-    saveRecords();
-    closeModal();
-    renderAdmin();
-    updateStats();
-    showToast(t('saved'));
-};
-
-// Sanitize input to prevent XSS
-function sanitize(str) {
-    if (!str) return '';
-    return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-// ════════════════════════════════════════════════
-// Custom Confirm Dialog
-// ════════════════════════════════════════════════
-let confirmPromiseRes;
-function showConfirm(msg, title = "Confirm") {
-    const modal = document.getElementById('confirmModal');
-    document.getElementById('confirmMsg').textContent = msg;
-    document.getElementById('confirmTitle').textContent = title;
-    modal.classList.add('open');
-    return new Promise(res => {
-        confirmPromiseRes = res;
-    });
-}
-
-function resolveConfirm(val) {
-    document.getElementById('confirmModal').classList.remove('open');
-    if (confirmPromiseRes) confirmPromiseRes(val);
-}
-
-window.editRecord   = (id) => openModal(id);
-window.deleteRecord = async (id) => {
-    const ok = await showConfirm(t('confirmDelete'));
-    if (ok) {
-        records = records.filter(x => x.id !== id);
-        saveRecords();
-        renderAdmin();
-        updateStats();
-        showToast(t('deleted'));
+        client.from('records').insert([recordData]).then(function(resp) {
+            if (!resp.error && resp.data) {
+                var newRecord = Object.assign({ id: resp.data[0].id, ts: Date.now() }, recordData);
+                records.unshift(newRecord);
+                saveCache();
+                closeModal();
+                renderAdmin();
+                updateStats();
+                showToast(t('saved'));
+            } else {
+                showToast('Error: ' + (resp.error ? resp.error.message : 'Unknown'), 'error');
+            }
+        });
     }
 };
 
-window.resolveConfirm = resolveConfirm;
+window.editRecord = function(id) { openModal(id); };
+window.deleteRecord = function(id) {
+    if (!isAuthenticated()) {
+        showToast(t('authRequired'), 'error');
+        return;
+    }
+    document.getElementById('confirmMsg').textContent = t('confirmDelete');
+    document.getElementById('confirmTitle').textContent = 'Delete Record';
+document.getElementById('confirmModal').classList.add('open');
+    window._confirmResolve = function(confirmed) {
+        document.getElementById('confirmModal').classList.remove('open');
+        if (confirmed) {
+            var client = getSupabaseClient();
+            client.from('records').delete().eq('id', id).then(function(resp) {
+                if (!resp.error) {
+                    records = records.filter(function(x) { return x.id !== id; });
+                    saveCache();
+                    renderAdmin();
+                    updateStats();
+                    showToast(t('deleted'));
+                } else {
+                    showToast('Error: ' + resp.error.message, 'error');
+                }
+            });
+        }
+    };
+}
 
+window.resolveConfirm = function(val) {
+    if (window._confirmResolve) {
+        window._confirmResolve(val);
+        window._confirmResolve = null;
+    }
+};
 
-
-// ════════════════════════════════════════════════
-// Voice Search
-// ════════════════════════════════════════════════
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+// Voice
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SR) {
-    const recognition = new SR();
+    var recognition = new SR();
     recognition.lang = 'hi-IN';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    const vb = document.getElementById('voiceBtn');
-    let isListening = false;
-
-    recognition.onstart = () => { isListening = true; vb.classList.add('recording'); };
-    recognition.onend   = () => { isListening = false; vb.classList.remove('recording'); };
-    recognition.onerror = () => { isListening = false; vb.classList.remove('recording'); };
-    recognition.onresult = (e) => {
-        const transcript = e.results[0][0].transcript;
-        const input = document.getElementById('mainSearch');
+    var vb = document.getElementById('voiceBtn');
+    var isListening = false;
+    recognition.onstart = function() { isListening = true; vb.classList.add('recording'); };
+    recognition.onend = function() { isListening = false; vb.classList.remove('recording'); };
+    recognition.onresult = function(e) {
+        var transcript = e.results[0][0].transcript;
+        var input = document.getElementById('mainSearch');
         input.value = transcript;
         input.dispatchEvent(new Event('input'));
     };
-
-    vb.onclick = () => {
-        if (isListening) recognition.stop();
-        else try { recognition.start(); } catch (e) {}
-    };
-
-    // ── Voice Add Wizard ──
-    window.startVoiceAdd = () => {
-        if (!SR) return;
-        const wizard = new SR();
-        wizard.lang = 'hi-IN';
-        wizard.interimResults = false;
-        
-        const status = document.getElementById('voiceStatus');
-        const vBtn = document.getElementById('voiceAddBtn');
-        let step = 0; // 0: Name, 1: Village, 2: Price
-
-        const updateUI = () => {
-            if (step === 0) status.textContent = t('sayName');
-            else if (step === 1) status.textContent = t('sayVillage');
-            else if (step === 2) status.textContent = t('sayPrice');
-            else status.textContent = t('voiceFinished');
-        };
-
-        wizard.onstart = () => {
-            vBtn.classList.add('recording');
-            updateUI();
-        };
-
-        wizard.onend = () => {
-            if (step < 3) {
-                try { wizard.start(); } catch (e) {}
-            } else {
-                vBtn.classList.remove('recording');
-                status.textContent = '';
-            }
-        };
-
-        wizard.onresult = (e) => {
-            const val = e.results[0][0].transcript;
-            if (step === 0) {
-                document.getElementById('fName').value = val;
-                step = 1;
-            } else if (step === 1) {
-                document.getElementById('fVillage').value = val;
-                step = 2;
-            } else if (step === 2) {
-                // Try to extract number from string
-                const num = val.match(/\d+/);
-                document.getElementById('fPrice').value = num ? num[0] : '';
-                step = 3;
-                wizard.stop();
-            }
-            updateUI();
-        };
-
-        try { wizard.start(); } catch (e) {}
-    };
+    if (vb) vb.onclick = function() { if (isListening) recognition.stop(); else try { recognition.start(); } catch (e) {}; };
+    window.startVoiceAdd = function() {};
 } else {
-    const vb = document.getElementById('voiceBtn');
+    var vb = document.getElementById('voiceBtn');
     if (vb) vb.style.display = 'none';
 }
 
-
-// ════════════════════════════════════════════════
-// Export / Import
-// ════════════════════════════════════════════════
-window.exportData = () => {
-    const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
+// Export
+window.exportData = function() {
+    var blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `village_directory_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = 'village_directory_' + new Date().toISOString().split('T')[0] + '.json';
     a.click();
-    URL.revokeObjectURL(a.href);
 };
 
-window.importData = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.readAsText(file, 'UTF-8');
-        reader.onload = (ev) => {
-            try {
-                const parsed = JSON.parse(ev.target.result);
-                if (!Array.isArray(parsed)) throw new Error('Not an array');
-                records = parsed.map((r, i) => ({
-                    id:      r.id || i + 1,
-                    name:    (r.name || '').trim(),
-                    village: (r.village || '').trim(),
-                    price:   Number(r.price) || 0,
-                    note:    (r.note || '').trim(),
-                    ts:      r.ts || Date.now()
-                }));
-                saveRecords();
-                renderAdmin();
-                updateStats();
-                showToast(t('imported'));
-            } catch {
-                showToast(t('invalidFile'), 'error');
-            }
-        };
-    };
-    input.click();
-};
-
-
-// ════════════════════════════════════════════════
-// Toast
-// ════════════════════════════════════════════════
 function showToast(msg, type) {
-    const toast = document.getElementById('toast');
+    var toast = document.getElementById('toast');
     toast.textContent = msg;
     toast.className = 'toast show ' + (type || 'success');
     clearTimeout(window._toastTimer);
-    window._toastTimer = setTimeout(() => { toast.className = 'toast'; }, 2800);
+    window._toastTimer = setTimeout(function() { toast.className = 'toast'; }, 2800);
 }
 
-
-// ════════════════════════════════════════════════
-// PWA Install
-// ════════════════════════════════════════════════
-window.addEventListener('beforeinstallprompt', (e) => {
+var deferredPrompt;
+window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     deferredPrompt = e;
-    const banner = document.getElementById('installBanner');
+    var banner = document.getElementById('installBanner');
     if (banner) banner.classList.add('show');
 });
 
-window.installPWA = async () => {
+window.installPWA = function() {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-        const banner = document.getElementById('installBanner');
-        if (banner) banner.classList.remove('show');
-    }
-    deferredPrompt = null;
+    deferredPrompt.userChoice.then(function(outcome) {
+        if (outcome === 'accepted') {
+            var banner = document.getElementById('installBanner');
+            if (banner) banner.classList.remove('show');
+        }
+        deferredPrompt = null;
+    });
 };
 
-
-// ── Sync with URL ──
 function syncUrl() {
-    const q = document.getElementById('mainSearch').value.trim();
-    const url = new URL(window.location);
+    var q = document.getElementById('mainSearch').value.trim();
+    var url = new URL(window.location);
     if (q) url.searchParams.set('q', q);
     else url.searchParams.delete('q');
     window.history.replaceState({}, '', url);
 }
 
-window.triggerSearch = () => {
-    const q = document.getElementById('mainSearch').value.trim();
+window.triggerSearch = function() {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    var q = document.getElementById('mainSearch').value.trim();
     if (q) {
-        currentQuery = q.toLowerCase();
+        currentQuery = sanitizeForSearch(q);
         syncUrl();
-        const filtered = records.filter(r =>
-            r.name.toLowerCase().includes(currentQuery) ||
-            r.village.toLowerCase().includes(currentQuery));
-        renderHome(filtered);
+        searchRecordsDB(currentQuery);
     }
 };
 
-// Enter key triggers search
-document.getElementById('mainSearch').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        triggerSearch();
-    }
-});
+if (mainSearchInput) {
+    mainSearchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); triggerSearch(); }
+    });
+}
 
-window.addEventListener('popstate', () => {
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('q');
+window.addEventListener('popstate', function() {
+    var params = new URLSearchParams(window.location.search);
+    var q = params.get('q');
     if (q) {
         document.getElementById('mainSearch').value = q;
-        renderResults(q);
+        currentQuery = sanitizeForSearch(q);
+        searchRecordsDB(currentQuery);
     } else {
         document.getElementById('mainSearch').value = '';
-        switchView('home');
+        currentQuery = '';
+        renderHome();
     }
 });
 
-// ════════════════════════════════════════════════
-// Init
-// ════════════════════════════════════════════════
+window.addEventListener('online', function() { isOnline = true; updateStats(); });
+window.addEventListener('offline', function() { isOnline = false; updateStats(); showToast(t('offline'), 'warning'); });
+
 function initApp() {
     lucide.createIcons();
     applyLang();
     loadRecords();
-    
-    // Check URL for search query
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('q');
+    var params = new URLSearchParams(window.location.search);
+    var q = params.get('q');
     if (q) {
         document.getElementById('mainSearch').value = q;
-        currentQuery = q.toLowerCase();
+        currentQuery = sanitizeForSearch(q);
     }
 }
 
 initApp();
 
-
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').catch(function() {});
 }
+
+// ════════════════════════════════════════════════
+// ANALYTICS SYSTEM
+// ════════════════════════════════════════════════
+var ANALYTICS_KEY = 'village_analytics';
+var analyticsFilter = 'all';
+
+function getAnalytics() {
+    var data = localStorage.getItem(ANALYTICS_KEY);
+    return data ? JSON.parse(data) : [];
+}
+
+function saveAnalytics(searchObj) {
+    var analytics = getAnalytics();
+    analytics.unshift({
+        query: searchObj.query,
+        results: searchObj.results,
+        timestamp: Date.now()
+    });
+    // Keep max 500 searches
+    if (analytics.length > 500) analytics = analytics.slice(0, 500);
+    localStorage.setItem(ANALYTICS_KEY, JSON.stringify(analytics));
+}
+
+function trackSearch(query, resultsCount) {
+    var searchObj = {
+        query: query,
+        results: resultsCount,
+        timestamp: Date.now()
+    };
+    saveAnalytics(searchObj);
+}
+
+function getFilteredAnalytics() {
+    var analytics = getAnalytics();
+    var now = Date.now();
+    var dayMs = 24 * 60 * 60 * 1000;
+    
+    if (analyticsFilter === 'today') {
+        return analytics.filter(function(a) { return now - a.timestamp < dayMs; });
+    }
+    return analytics;
+}
+
+function getTopItems(analytics, key, limit) {
+    var counts = {};
+    analytics.forEach(function(a) {
+        var item = a[key] || 'Unknown';
+        if (!counts[item]) counts[item] = { count: 0, resultsSum: 0 };
+        counts[item].count++;
+        counts[item].resultsSum += a.results || 0;
+    });
+    return Object.keys(counts).map(function(name) {
+        return { name: name, count: counts[name].count, resultsSum: counts[name].resultsSum };
+    }).sort(function(a, b) { return b.count - a.count; }).slice(0, limit);
+}
+
+function renderAnalytics() {
+    var analytics = getFilteredAnalytics();
+    var totalSearches = analytics.length;
+    var uniqueQueries = {};
+    var totalResults = 0;
+    analytics.forEach(function(a) {
+        uniqueQueries[a.query] = true;
+        totalResults += a.results || 0;
+    });
+    var uniqueCount = Object.keys(uniqueQueries).length;
+    
+    document.getElementById('totalSearches').textContent = totalSearches;
+    document.getElementById('uniqueQueries').textContent = uniqueCount;
+    document.getElementById('totalResults').textContent = totalResults;
+    
+    // Top Names
+    var topNames = getTopItems(analytics, 'query', 5);
+    var maxCount = topNames.length > 0 ? topNames[0].count : 1;
+    var namesChart = topNames.length > 0 ? topNames.map(function(item) {
+        var percent = Math.round((item.count / maxCount) * 100);
+        return '<div class="bar-item"><div class="bar-label">' + escapeHtml(item.name.slice(0, 15)) + '</div><div class="bar-track"><div class="bar-fill" style="width:' + percent + '%"></div></div><div class="bar-value">' + item.count + '</div></div>';
+    }).join('') : '<div class="analytics-empty"><i data-lucide="search-x"></i><p>No data yet</p></div>';
+    document.getElementById('topNamesChart').innerHTML = namesChart;
+    
+    // Top Villages (using same data for demo - in real app would track separately)
+    var topVillages = getTopItems(analytics, 'query', 5);
+    var maxV = topVillages.length > 0 ? topVillages[0].count : 1;
+    var villagesChart = topVillages.length > 0 ? topVillages.map(function(item) {
+        var percent = Math.round((item.count / maxV) * 100);
+        return '<div class="bar-item"><div class="bar-label">' + escapeHtml(item.name.slice(0, 15)) + '</div><div class="bar-track"><div class="bar-fill" style="width:' + percent + '%"></div></div><div class="bar-value">' + item.count + '</div></div>';
+    }).join('') : '<div class="analytics-empty"><i data-lucide="search-x"></i><p>No data yet</p></div>';
+    document.getElementById('topVillagesChart').innerHTML = villagesChart;
+    
+    // Recent Searches
+    var recent = analytics.slice(0, 10);
+    var recentList = recent.length > 0 ? recent.map(function(a) {
+        var time = formatTimeAgo(a.timestamp);
+        return '<div class="search-item"><div class="search-query">' + escapeHtml(a.query) + '</div><div class="search-time">' + time + '</div></div>';
+    }).join('') : '<div class="analytics-empty"><i data-lucide="search-x"></i><p>No recent searches</p></div>';
+    document.getElementById('recentSearchesList').innerHTML = recentList;
+    
+    lucide.createIcons();
+}
+
+function formatTimeAgo(timestamp) {
+    var seconds = Math.floor((Date.now() - timestamp) / 1000);
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+    if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+    return Math.floor(seconds / 86400) + 'd ago';
+}
+
+function setAnalyticsFilter(filter) {
+    analyticsFilter = filter;
+    document.getElementById('filterAll').classList.toggle('active', filter === 'all');
+    document.getElementById('filterToday').classList.toggle('active', filter === 'today');
+    renderAnalytics();
+}
+
+function clearAnalytics() {
+    document.getElementById('confirmMsg').textContent = 'Clear all analytics data?';
+    document.getElementById('confirmTitle').textContent = 'Clear Analytics';
+    document.getElementById('confirmModal').classList.add('open');
+    window._confirmResolve = function(confirmed) {
+        document.getElementById('confirmModal').classList.remove('open');
+        if (confirmed) {
+            localStorage.removeItem(ANALYTICS_KEY);
+            renderAnalytics();
+            showToast('Analytics cleared');
+        }
+    };
+}
+
+// Modify search to track
+var originalSearchRecordsDB = searchRecordsDB;
+searchRecordsDB = function(query, callback) {
+    originalSearchRecordsDB(query, function() {
+        setTimeout(function() {
+            var resultsEl = document.getElementById('resultCount');
+            var results = 0;
+            if (resultsEl) {
+                var match = resultsEl.textContent.match(/(\d+)/);
+                if (match) results = parseInt(match[1]);
+            }
+            trackSearch(query, results);
+        }, 500);
+        if (callback) callback();
+    });
+};
