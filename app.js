@@ -447,6 +447,188 @@ function renderSearchResults(items) {
     if (!iconsRendered) { lucide.createIcons(); iconsRendered = true; }
 }
 
+// ════════════════════════════════════════════════
+// ADMIN SEARCH FUNCTIONS
+// ════════════════════════════════════════════════
+var adminSearchTimeout = null;
+var adminCurrentQuery = '';
+var adminSearchResults = [];
+
+function performAdminSearch() {
+    if (adminSearchTimeout) clearTimeout(adminSearchTimeout);
+
+    var input = document.getElementById('adminSearchInput');
+    if (!input) return;
+
+    var query = input.value.trim();
+    adminCurrentQuery = sanitizeSearch(query);
+
+    if (!query) {
+        clearAdminSearch();
+        return;
+    }
+
+    // Show loading state
+    var searchBtn = document.getElementById('adminSearchBtn');
+    var originalText = searchBtn.innerHTML;
+    searchBtn.innerHTML = '<i data-lucide="loader-2" style="width:18px;height:18px;animation:spin 1s linear infinite"></i> Searching...';
+    searchBtn.disabled = true;
+
+    adminSearchTimeout = setTimeout(function () {
+        var client = getSupabaseClient();
+        if (client && isOnline) {
+            // First try exact and partial matches via Supabase
+            client.from('records').select('id, name, village, price, note, created_at')
+                .or('name.ilike.%' + adminCurrentQuery + '%,village.ilike.%' + adminCurrentQuery + '%')
+                .order('created_at', { ascending: false })
+                .limit(100)
+                .then(function (resp) {
+                    if (resp.error) {
+                        console.error('Admin search error:', resp.error);
+                        showToast(t('searchError') || 'Search failed', 'error');
+                        renderAdminSearchResults([]);
+                        return;
+                    }
+
+                    var results = (resp.data || []).map(function (r) {
+                        return {
+                            id: r.id,
+                            name: safeDisplay(r.name),
+                            village: safeDisplay(r.village),
+                            price: Number(r.price) || 0,
+                            note: safeDisplay(r.note, ''),
+                            ts: r.created_at ? new Date(r.created_at).getTime() : Date.now()
+                        };
+                    });
+
+                    // If we have results, display them
+                    if (results.length > 0) {
+                        adminSearchResults = results;
+                        renderAdminSearchResults(results);
+                    } else {
+                        // If no results from Supabase, try fuzzy search on all records
+                        performFuzzyAdminSearch(query);
+                    }
+                })
+                .catch(function (err) {
+                    console.error('Admin search exception:', err);
+                    showToast(t('searchError') || 'Search failed', 'error');
+                    renderAdminSearchResults([]);
+                })
+                .finally(function () {
+                    // Restore button
+                    searchBtn.innerHTML = originalText;
+                    searchBtn.disabled = false;
+                });
+        } else {
+            showToast(t('offlineError') || 'You are offline', 'error');
+            renderAdminSearchResults([]);
+            searchBtn.innerHTML = originalText;
+            searchBtn.disabled = false;
+        }
+    }, 300);
+}
+
+function performFuzzyAdminSearch(query) {
+    // Use fuzzy matching on all loaded records
+    var allRecords = records.length > 0 ? records : [];
+    if (allRecords.length === 0) {
+        // Try to load records first
+        loadRecords(function (loadedRecords) {
+            if (loadedRecords && loadedRecords.length > 0) {
+                var fuzzyResults = smartSearch(loadedRecords, query);
+                adminSearchResults = fuzzyResults;
+                renderAdminSearchResults(fuzzyResults);
+            } else {
+                renderAdminSearchResults([]);
+            }
+        });
+        return;
+    }
+
+    var fuzzyResults = smartSearch(allRecords, query);
+    adminSearchResults = fuzzyResults;
+    renderAdminSearchResults(fuzzyResults);
+}
+
+function renderAdminSearchResults(items) {
+    var list = document.getElementById('adminList');
+    var countEl = document.getElementById('adminSearchCount');
+    var statsEl = document.getElementById('adminSearchStats');
+
+    if (!list || !countEl || !statsEl) return;
+
+    var total = items.length;
+    countEl.textContent = total;
+
+    if (total > 0) {
+        statsEl.style.color = 'var(--text-primary)';
+        statsEl.style.fontWeight = '600';
+    } else {
+        statsEl.style.color = 'var(--text-secondary)';
+        statsEl.style.fontWeight = '400';
+    }
+
+    if (!items.length) {
+        var msg = adminCurrentQuery ? t('noRecords') : t('noData');
+        list.innerHTML = '<div class="empty-state" style="margin-top: 40px;"><i data-lucide="search-x"></i><p>' + msg + '</p><p style="color:var(--text-dim);margin-top:8px;font-size:0.9rem;">Try a different search term</p></div>';
+        lucide.createIcons();
+        return;
+    }
+
+    // Render with admin controls (showAdmin = true)
+    list.innerHTML = items.map(function (r) { return cardHTML(r, adminCurrentQuery, true); }).join('');
+    lucide.createIcons();
+
+    // Scroll to results
+    list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearAdminSearch() {
+    var input = document.getElementById('adminSearchInput');
+    if (input) input.value = '';
+
+    adminCurrentQuery = '';
+    adminSearchResults = [];
+
+    var countEl = document.getElementById('adminSearchCount');
+    var statsEl = document.getElementById('adminSearchStats');
+    if (countEl) countEl.textContent = '0';
+    if (statsEl) {
+        statsEl.style.color = 'var(--text-secondary)';
+        statsEl.style.fontWeight = '400';
+    }
+
+    // Reload all records in admin view
+    if (currentView === 'admin') {
+        loadRecords(function (data) {
+            renderAdmin(data);
+        });
+    }
+}
+
+// Add CSS for spinner animation
+function addSearchStyles() {
+    if (!document.getElementById('admin-search-styles')) {
+        var style = document.createElement('style');
+        style.id = 'admin-search-styles';
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            .admin-search-container .search-input-wrapper:focus-within {
+                border-color: var(--accent);
+            }
+            .admin-search-container input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
 function sortData(data) {
     if (!data || !data.length) return [];
     var d = data.slice();
